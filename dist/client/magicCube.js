@@ -1,54 +1,50 @@
-import * as THREE from '/build/three.module.js'
-import { BooleanKeyframeTrack, Vector3 } from '/build/three.module.js';
-
+import * as THREE from '/build/three.module.js';
 // 以下按照面的渲染顺序排序(上黄下白，前蓝后绿，左橙右红)
-export enum rotateDirection {
+export var rotateDirection;
+(function (rotateDirection) {
     // 顺时针
-    Clockwise,
+    rotateDirection[rotateDirection["Clockwise"] = 0] = "Clockwise";
     // 逆时针
-    AntiClockwise,
-}
-export enum cubeDirection {
-    None = -1,
-    Right,
-    Left,
-    Up,
-    Down,
-    Front,
-    Back
-}
-export enum cubeColor {
-    Black = "#222831",
-    Red = "#854e4b",
-    Orange = "#de7921",
-    Yellow = "#F9CE00",
-    White = "#fafbfd",
-    Blue = "#336699",
-    Green = "#739e3b"
-}
-
+    rotateDirection[rotateDirection["AntiClockwise"] = 1] = "AntiClockwise";
+})(rotateDirection || (rotateDirection = {}));
+export var cubeDirection;
+(function (cubeDirection) {
+    cubeDirection[cubeDirection["None"] = -1] = "None";
+    cubeDirection[cubeDirection["Right"] = 0] = "Right";
+    cubeDirection[cubeDirection["Left"] = 1] = "Left";
+    cubeDirection[cubeDirection["Up"] = 2] = "Up";
+    cubeDirection[cubeDirection["Down"] = 3] = "Down";
+    cubeDirection[cubeDirection["Front"] = 4] = "Front";
+    cubeDirection[cubeDirection["Back"] = 5] = "Back";
+})(cubeDirection || (cubeDirection = {}));
+export var cubeColor;
+(function (cubeColor) {
+    cubeColor["Black"] = "#222831";
+    cubeColor["Red"] = "#854e4b";
+    cubeColor["Orange"] = "#de7921";
+    cubeColor["Yellow"] = "#F9CE00";
+    cubeColor["White"] = "#fafbfd";
+    cubeColor["Blue"] = "#336699";
+    cubeColor["Green"] = "#739e3b";
+})(cubeColor || (cubeColor = {}));
 export class MagicCube {
-
-    private maxRanks: number = 0;
-    private cubeOffset: number = 0.1;
-    private cubeRadius: number = 0.5;
-    private cubeDiameter: number = this.cubeRadius * 2;
-    private scene: THREE.Scene;
-    private cubeArr: Array<THREE.Mesh>;
-    constructor(scene: THREE.Scene, num: number) {
+    constructor(scene, num) {
+        this.maxRanks = 0;
+        this.cubeOffset = 0.1;
+        this.cubeRadius = 0.5;
+        this.cubeDiameter = this.cubeRadius * 2;
         this.scene = scene;
-        this.cubeArr = new Array<THREE.Mesh>();
+        this.cubeArr = new Array();
         this.maxRanks = num;
         //正方体6个面，每个面num*num
-        this.createMagicCube(num)
+        this.createMagicCube(num);
     }
-
     /**
      * nxnxn的立方体
-     * @param num 
+     * @param num
      */
-    public createMagicCube(num: number) {
-        let ix, iy, iz: number = 0;
+    createMagicCube(num) {
+        let ix, iy, iz = 0;
         for (ix = 0; ix < num; ix++) {
             for (iy = 0; iy < num; iy++) {
                 for (iz = 0; iz < num; iz++) {
@@ -63,33 +59,27 @@ export class MagicCube {
             }
         }
     }
-    private createCube(x: number, y: number, z: number, dirs: number[]) {
-
-        const geometry: THREE.BoxGeometry = new THREE.BoxGeometry(this.cubeDiameter, this.cubeDiameter, this.cubeDiameter);
+    createCube(x, y, z, dirs) {
+        const geometry = new THREE.BoxGeometry(this.cubeDiameter, this.cubeDiameter, this.cubeDiameter);
         let mats = [];
-
         for (var i = 0; i < geometry.faces.length; i++) {
-            let boxColor: string = cubeColor.Black;
+            let boxColor = cubeColor.Black;
             if (dirs.includes(i)) {
                 boxColor = this.getCubeColor(i);
             }
-
             let material = new THREE.MeshBasicMaterial({
                 color: boxColor, wireframe: false
             });
             mats.push(material);
         }
-
         // MeshLambertMaterial
         let cube = new THREE.Mesh(geometry, mats);
         cube.position.set(x, y, z);
         this.cubeArr.push(cube);
         this.scene.add(cube);
-
     }
-
-    private getCubeDir(ix: number, iy: number, iz: number, maxNum: number): number[] {
-        let dir: Array<number> = new Array<number>();
+    getCubeDir(ix, iy, iz, maxNum) {
+        let dir = new Array();
         let dirx = ix == maxNum - 1 ? cubeDirection.Right : ix == 0 ? cubeDirection.Left : cubeDirection.None;
         let diry = iy == maxNum - 1 ? cubeDirection.Up : iy == 0 ? cubeDirection.Down : cubeDirection.None;
         let dirz = iz == maxNum - 1 ? cubeDirection.Front : iz == 0 ? cubeDirection.Back : cubeDirection.None;
@@ -98,9 +88,8 @@ export class MagicCube {
         dir.push(dirz);
         return dir;
     }
-
-    private getCubeColor(direction: number): string {
-        let result: string = "";
+    getCubeColor(direction) {
+        let result = "";
         switch (direction) {
             case cubeDirection.None:
                 result = cubeColor.Black;
@@ -128,9 +117,8 @@ export class MagicCube {
         }
         return result;
     }
-
-    public getFaceCube(direction: cubeDirection) {
-        let resultArr = new Array<THREE.Mesh>();
+    getFaceCube(direction) {
+        let resultArr = new Array();
         for (let i = 0; i < this.cubeArr.length; i++) {
             switch (direction) {
                 case cubeDirection.Right:
@@ -169,16 +157,15 @@ export class MagicCube {
         }
         return resultArr;
     }
-
     /**
      * rotate
      */
-    public rotate(direction: cubeDirection, rtDirect: rotateDirection, angle: number) {
-        let arr: Array<THREE.Mesh> = this.getFaceCube(direction);
-        let resultAngle: number = rtDirect == rotateDirection.Clockwise ? -1 : 1;
+    rotate(direction, rtDirect, angle) {
+        let arr = this.getFaceCube(direction);
+        let resultAngle = rtDirect == rotateDirection.Clockwise ? -1 : 1;
         resultAngle = resultAngle * Math.abs(angle);
         let absAngle = Math.abs(angle);
-        let midCube: Vector3 = arr[4].position;
+        let midCube = arr[4].position;
         arr.forEach(item => {
             item.rotateX(resultAngle);
             // let oriPos = item.position;

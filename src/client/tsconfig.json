@@ -9,7 +9,7 @@
             "/jsm/*": ["../../node_modules/three/examples/jsm/*"],
         },
         "moduleResolution": "node",
-        "strict": true,
+        "strict": false,
         "allowUmdGlobalAccess": true//指 UMD 全局，但当前文件是模块。请考虑改为添加导入。
     },
     "include": [

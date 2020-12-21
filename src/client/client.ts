@@ -2,7 +2,8 @@ import { NONAME } from 'dns';
 import * as THREE from '/build/three.module.js'
 import { Color } from '/build/three.module.js';
 import { OrbitControls } from '/jsm/controls/OrbitControls'
-/// <reference path = "MagicCube.d.ts" />
+import { cubeDirection, MagicCube, rotateDirection } from "./magicCube"
+
 let scene: THREE.Scene;
 let renderer: THREE.WebGLRenderer;
 let camera: THREE.Camera;
@@ -77,8 +78,8 @@ function initBase() {
     window.addEventListener('resize', onWindowResize, false);
 
     //绘制魔方
-    let magicCube = new MagicCube(scene);
-    magicCube.createMagicCube(MAGICCUBERANKS);
+    let magicCube = new MagicCube(scene, MAGICCUBERANKS);
+    magicCube.rotate(cubeDirection.Right, rotateDirection.AntiClockwise, 30);
 }
 
 function createAxis() {
