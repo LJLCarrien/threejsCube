@@ -1,5 +1,5 @@
 import * as THREE from '/build/three.module.js'
-import { BooleanKeyframeTrack, Vector3 } from '/build/three.module.js';
+import { Vector3 } from '/build/three.module.js';
 
 // 以下按照面的渲染顺序排序(上黄下白，前蓝后绿，左橙右红)
 export enum rotateDirection {
