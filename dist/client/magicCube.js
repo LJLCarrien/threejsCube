@@ -28,16 +28,39 @@ export var cubeColor;
     cubeColor["Green"] = "#739e3b";
 })(cubeColor || (cubeColor = {}));
 export class MagicCube {
-    constructor(scene, num) {
+    // constructor(scene: THREE.Scene, num: number) {
+    //     this.scene = scene;
+    //     this.cubeArr = new Array<THREE.Mesh>();
+    //     this.maxRanks = num;
+    //     //正方体6个面，每个面num*num
+    //     this.createMagicCube(num)
+    // }
+    constructor(scene) {
         this.maxRanks = 0;
         this.cubeOffset = 0.1;
         this.cubeRadius = 0.5;
         this.cubeDiameter = this.cubeRadius * 2;
         this.scene = scene;
         this.cubeArr = new Array();
-        this.maxRanks = num;
-        //正方体6个面，每个面num*num
-        this.createMagicCube(num);
+    }
+    /**
+     * createNormCube
+     */
+    createNormCube(pos) {
+        const geometry = new THREE.BoxGeometry(this.cubeDiameter, this.cubeDiameter, this.cubeDiameter);
+        let mats = [];
+        for (var i = 0; i < geometry.faces.length; i++) {
+            let material = new THREE.MeshBasicMaterial({
+                color: 0xFFFFFF * Math.random(), wireframe: false
+            });
+            mats.push(material);
+        }
+        // MeshLambertMaterial
+        let cube = new THREE.Mesh(geometry, mats);
+        cube.position.set(pos.x, pos.y, pos.z);
+        this.cubeArr.push(cube);
+        this.scene.add(cube);
+        return cube;
     }
     /**
      * nxnxn的立方体

@@ -1,3 +1,4 @@
+import { match } from 'assert';
 import * as THREE from '/build/three.module.js'
 import { Vector3 } from '/build/three.module.js';
 
@@ -35,14 +36,40 @@ export class MagicCube {
     private cubeDiameter: number = this.cubeRadius * 2;
     private scene: THREE.Scene;
     private cubeArr: Array<THREE.Mesh>;
-    constructor(scene: THREE.Scene, num: number) {
+    // constructor(scene: THREE.Scene, num: number) {
+    //     this.scene = scene;
+    //     this.cubeArr = new Array<THREE.Mesh>();
+    //     this.maxRanks = num;
+    //     //正方体6个面，每个面num*num
+    //     this.createMagicCube(num)
+    // }
+
+    constructor(scene: THREE.Scene) {
         this.scene = scene;
         this.cubeArr = new Array<THREE.Mesh>();
-        this.maxRanks = num;
-        //正方体6个面，每个面num*num
-        this.createMagicCube(num)
     }
 
+    /**
+     * createNormCube
+     */
+    public createNormCube(pos: Vector3): THREE.Mesh {
+        const geometry: THREE.BoxGeometry = new THREE.BoxGeometry(this.cubeDiameter, this.cubeDiameter, this.cubeDiameter);
+        let mats = [];
+
+        for (var i = 0; i < geometry.faces.length; i++) {
+            let material = new THREE.MeshBasicMaterial({
+                color: 0xFFFFFF * Math.random(), wireframe: false
+            });
+            mats.push(material);
+        }
+
+        // MeshLambertMaterial
+        let cube = new THREE.Mesh(geometry, mats);
+        cube.position.set(pos.x, pos.y, pos.z);
+        this.cubeArr.push(cube);
+        this.scene.add(cube);
+        return cube;
+    }
     /**
      * nxnxn的立方体
      * @param num 

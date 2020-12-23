@@ -1,6 +1,6 @@
 import { NONAME } from 'dns';
 import * as THREE from '/build/three.module.js'
-import { Color } from '/build/three.module.js';
+import { Color, Mesh, Vector3 } from '/build/three.module.js';
 import { OrbitControls } from '/jsm/controls/OrbitControls'
 import { cubeDirection, MagicCube, rotateDirection } from "./magicCube"
 
@@ -9,14 +9,14 @@ let renderer: THREE.WebGLRenderer;
 let camera: THREE.Camera;
 let controls: OrbitControls;
 
-
+let cubeArr: Array<Mesh>;
 
 const MAGICCUBERANKS = 3;
 initBase();
 
 createAxis();
 
-creatPlane();
+// creatPlane();
 createLights();
 
 
@@ -78,8 +78,23 @@ function initBase() {
     window.addEventListener('resize', onWindowResize, false);
 
     //绘制魔方
-    let magicCube = new MagicCube(scene, MAGICCUBERANKS);
-    magicCube.rotate(cubeDirection.Right, rotateDirection.AntiClockwise, 30);
+    // let magicCube = new MagicCube(scene, MAGICCUBERANKS);
+    // magicCube.rotate(cubeDirection.Right, rotateDirection.AntiClockwise, 30);
+
+    let magicCube = new MagicCube(scene);
+    cubeArr=new Array<Mesh>();
+    cubeArr.push(magicCube.createNormCube(new Vector3(0, 0, 0)));
+    cubeArr.push(magicCube.createNormCube(new Vector3(0, 0, 0)));
+    cubeArr.push(magicCube.createNormCube(new Vector3(0, 0, 0)));
+    cubeArr.push(magicCube.createNormCube(new Vector3(0, 0, 0)));
+
+    // cubeArr[1].rotateY(45*Math.PI/180);
+    
+    // cubeArr[2].rotateY(45*Math.PI/180);
+    // cubeArr[2].translateX(1);
+
+    // cubeArr[3].rotateY(135*Math.PI/180);
+    // cubeArr[3].translateX(1);
 }
 
 function createAxis() {
@@ -109,7 +124,9 @@ var animate = function () {
     requestAnimationFrame(animate);
 
     controls.update();
-
+    cubeArr[3].rotateY(10 * Math.PI / 180);
+    cubeArr[3].translateX(1);
+    
     render();
 };
 

@@ -1,14 +1,16 @@
 import * as THREE from '/build/three.module.js';
+import { Vector3 } from '/build/three.module.js';
 import { OrbitControls } from '/jsm/controls/OrbitControls';
-import { cubeDirection, MagicCube, rotateDirection } from "./magicCube";
+import { MagicCube } from "./magicCube";
 let scene;
 let renderer;
 let camera;
 let controls;
+let cubeArr;
 const MAGICCUBERANKS = 3;
 initBase();
 createAxis();
-creatPlane();
+// creatPlane();
 createLights();
 function createLights() {
     // 添加环境光，提高场景亮度
@@ -57,8 +59,19 @@ function initBase() {
     controls = new OrbitControls(camera, renderer.domElement);
     window.addEventListener('resize', onWindowResize, false);
     //绘制魔方
-    let magicCube = new MagicCube(scene, MAGICCUBERANKS);
-    magicCube.rotate(cubeDirection.Right, rotateDirection.AntiClockwise, 30);
+    // let magicCube = new MagicCube(scene, MAGICCUBERANKS);
+    // magicCube.rotate(cubeDirection.Right, rotateDirection.AntiClockwise, 30);
+    let magicCube = new MagicCube(scene);
+    cubeArr = new Array();
+    cubeArr.push(magicCube.createNormCube(new Vector3(0, 0, 0)));
+    cubeArr.push(magicCube.createNormCube(new Vector3(0, 0, 0)));
+    cubeArr.push(magicCube.createNormCube(new Vector3(0, 0, 0)));
+    cubeArr.push(magicCube.createNormCube(new Vector3(0, 0, 0)));
+    // cubeArr[1].rotateY(45*Math.PI/180);
+    // cubeArr[2].rotateY(45*Math.PI/180);
+    // cubeArr[2].translateX(1);
+    // cubeArr[3].rotateY(135*Math.PI/180);
+    // cubeArr[3].translateX(1);
 }
 function createAxis() {
     // 创建坐标轴（RGB颜色 分别代表 XYZ轴）
@@ -80,6 +93,8 @@ function render() {
 var animate = function () {
     requestAnimationFrame(animate);
     controls.update();
+    cubeArr[3].rotateY(10 * Math.PI / 180);
+    cubeArr[3].translateX(1);
     render();
 };
 animate();
