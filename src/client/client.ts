@@ -9,10 +9,16 @@ let renderer: THREE.WebGLRenderer;
 let camera: THREE.Camera;
 let controls: OrbitControls;
 
-let cubeArr: Array<Mesh>;
+let box: THREE.Mesh;
+let box_matrix: THREE.Matrix4;
+
+let cylinder: THREE.Mesh;
+let cylinder_matrix: THREE.Matrix4;
+let start_cylinder_matrix: THREE.Matrix4;
 
 const MAGICCUBERANKS = 3;
 initBase();
+initObject()
 
 createAxis();
 
@@ -27,7 +33,7 @@ function createLights() {
 
     // 添加聚光灯，以产生阴影
     var spotLight = new THREE.SpotLight(0xffffff);
-    spotLight.position.set(-40, 60, -10);
+    spotLight.position.set(2, 5, 2);
     spotLight.castShadow = true;
     scene.add(spotLight);
 }
@@ -49,8 +55,6 @@ function creatPlane() {
     scene.add(plane);
 }
 
-
-
 function initCamera(type: number) {
     if (type == 1) {
         // 正交投影摄像机
@@ -61,6 +65,51 @@ function initCamera(type: number) {
         camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 1000);
         camera.position.z = 8;
     }
+}
+
+function initObject() {
+    // var box_geometry = new THREE.BoxGeometry();
+    var sphere_geometry = new THREE.SphereGeometry(0.5, 32, 32);
+    var cylinder_geometry = new THREE.CylinderGeometry(0.1, 0.1, 0.5);
+
+    var material = new THREE.MeshLambertMaterial({ color: new THREE.Color(0.9, 0.55, 0.4) })
+
+    // box = new THREE.Mesh(box_geometry, material);
+    var sphere = new THREE.Mesh(sphere_geometry, material);
+    cylinder = new THREE.Mesh(cylinder_geometry, material);
+
+    var pile = new THREE.Object3D();
+    pile.scale.multiplyScalar(0.5);
+    // pile.add(box);
+    pile.add(sphere);
+    pile.add(cylinder);
+    scene.add(pile);
+
+    // 就不能再通过position，scale和rotation去修改矩阵。
+    // box.matrixAutoUpdate = false;
+    sphere.matrixAutoUpdate = false;
+    cylinder.matrixAutoUpdate = false;
+
+    // box_matrix = new THREE.Matrix4();
+    // box.applyMatrix4(box_matrix);
+
+    var sphere_matrix = new THREE.Matrix4().makeTranslation(0.0, 1.0, 0.0);
+    sphere.applyMatrix4(sphere_matrix);
+
+
+    updateCylinder(0);
+    start_cylinder_matrix = cylinder.matrix.clone();
+}
+
+function resetCylinder() {
+    cylinder.matrix = start_cylinder_matrix.clone();
+}
+function updateCylinder(angle) {
+    cylinder.matrix = new THREE.Matrix4();
+    cylinder_matrix = new THREE.Matrix4().makeTranslation(0.0, 1.0, 0.0);
+    cylinder_matrix.multiply(new THREE.Matrix4().makeRotationZ(angle * Math.PI / 180));
+    cylinder_matrix.multiply(new THREE.Matrix4().makeTranslation(0.0, 0.75, 0.0));
+    cylinder.applyMatrix4(cylinder_matrix);
 }
 
 function initBase() {
@@ -81,20 +130,6 @@ function initBase() {
     // let magicCube = new MagicCube(scene, MAGICCUBERANKS);
     // magicCube.rotate(cubeDirection.Right, rotateDirection.AntiClockwise, 30);
 
-    let magicCube = new MagicCube(scene);
-    cubeArr=new Array<Mesh>();
-    cubeArr.push(magicCube.createNormCube(new Vector3(0, 0, 0)));
-    cubeArr.push(magicCube.createNormCube(new Vector3(0, 0, 0)));
-    cubeArr.push(magicCube.createNormCube(new Vector3(0, 0, 0)));
-    cubeArr.push(magicCube.createNormCube(new Vector3(0, 0, 0)));
-
-    // cubeArr[1].rotateY(45*Math.PI/180);
-    
-    // cubeArr[2].rotateY(45*Math.PI/180);
-    // cubeArr[2].translateX(1);
-
-    // cubeArr[3].rotateY(135*Math.PI/180);
-    // cubeArr[3].translateX(1);
 }
 
 function createAxis() {
@@ -120,15 +155,44 @@ function render() {
     renderer.render(scene, camera);
 }
 
-var animate = function () {
-    requestAnimationFrame(animate);
+let angle = 10;
+let start;
+let lastTime;
 
-    controls.update();
-    cubeArr[3].rotateY(10 * Math.PI / 180);
-    cubeArr[3].translateX(1);
-    
+window.requestAnimationFrame(animate);
+
+function animate(timestamp) {
+
+    if (start === undefined)
+        start = timestamp;
+    if (lastTime === undefined)
+        lastTime = timestamp;
+    const deltTime = timestamp - lastTime;
+    const elapsed = timestamp - start;
+    // if (deltTime > 1000) {
+    //     if (elapsed < 360 * 1000) {
+    //         updateCylinder(angle);
+    //     }
+    // }
+    updateCylinder(angle);
+    lastTime = timestamp;
+    controls.update()
+
+    angle++;
+
     render();
+    requestAnimationFrame(animate);
 };
 
+$("#updateCylinder").click(function (e) {
+    resetCylinder();
+    updateCylinder(angle);
+    angle += 10;
+});
 
-animate();
+$("#resetCylinder").click(function (e) {
+    resetCylinder();
+    angle = 0;
+});
+
+// animate();
