@@ -176,12 +176,40 @@ export class MagicCube {
         return resultArr;
     }
 
+    private direction: cubeDirection = cubeDirection.None;
+    private rtDirect: rotateDirection = rotateDirection.Clockwise;
+    private targetAngle: number = 0;
+    private animationSpeed: number = 1;
 
+    private resetAnimateInfo() {
+        this.direction = cubeDirection.None;
+        this.rtDirect = rotateDirection.Clockwise;
+        this.targetAngle = 0;
+    }
 
-    /**
-     * rotate
-     */
-    public rotate(direction: cubeDirection, rtDirect: rotateDirection, angle: number) {
+    public imediateApply() {
+        this.rotateImediate(this.direction, this.rtDirect, this.targetAngle);
+        this.resetAnimateInfo();
+    }
+    public rotate(direction: cubeDirection, rtDirect: rotateDirection, angle: number, isNeedAnimation = true) {
+        if (isNeedAnimation) {
+            if (this.isAnimating()) {
+                console.log("动画过程中不允许旋转");
+                return;
+            }
+            this.direction = direction;
+            this.rtDirect = rtDirect;
+            this.targetAngle = angle;
+        }
+        else {
+            if (this.isAnimating()) {
+                this.imediateApply();
+            }
+            this.rotateImediate(direction, rtDirect, angle);
+        }
+    }
+
+    private rotateImediate(direction: cubeDirection, rtDirect: rotateDirection, angle: number) {
         let arr: Array<THREE.Mesh> = this.getFaceCube(direction);
         let resultAngle: number = rtDirect == rotateDirection.Clockwise ? -1 : 1;
         angle = angle * Math.PI / 180;
@@ -203,6 +231,27 @@ export class MagicCube {
             // 把所有方块移动到中心，先旋转，再平移
             item.matrix.multiply(new THREE.Matrix4().makeRotationX(resultAngle));
             item.matrix.multiply(new THREE.Matrix4().makeTranslation(offsetPos.x, offsetPos.y, offsetPos.z));
+        }
+    }
+
+    public isAnimating() {
+        return this.targetAngle > 0;
+    }
+
+    public setAnimationSpeed(speed: number) {
+        this.animationSpeed = speed;
+    }
+
+    public updateAnimation() {
+        if (this.targetAngle > 0) {
+            let angle = Math.min(this.targetAngle, this.animationSpeed);
+            this.targetAngle -= angle;
+
+            this.rotateImediate(this.direction, this.rtDirect, angle);
+
+            if (this.targetAngle == 0) {
+                this.resetAnimateInfo();
+            }
         }
     }
 }

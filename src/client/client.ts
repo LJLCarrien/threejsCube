@@ -10,16 +10,15 @@ let camera: THREE.Camera;
 let controls: OrbitControls;
 
 let magicCube: MagicCube;
+const MAGICCUBE_RANKS = 3;
+const MAGICCUBE_ROTATE_SPEED = 10;
 
-
-const MAGICCUBERANKS = 3;
 initBase();
-
+initMagicCube();
 createAxis();
 
 creatPlane();
 createLights();
-
 
 function createLights() {
     // 添加环境光，提高场景亮度
@@ -51,7 +50,6 @@ function creatPlane() {
 }
 
 
-
 function initCamera(type: number) {
     if (type == 1) {
         // 正交投影摄像机
@@ -77,10 +75,12 @@ function initBase() {
 
     controls = new OrbitControls(camera, renderer.domElement);
     window.addEventListener('resize', onWindowResize, false);
+}
 
+function initMagicCube() {
     //绘制魔方
-    magicCube = new MagicCube(scene, MAGICCUBERANKS);
-    // magicCube.rotate(cubeDirection.Right, rotateDirection.AntiClockwise, 10);
+    magicCube = new MagicCube(scene, MAGICCUBE_RANKS);
+    magicCube.setAnimationSpeed(MAGICCUBE_ROTATE_SPEED);
 }
 
 function createAxis() {
@@ -88,8 +88,6 @@ function createAxis() {
     var axisHelper = new THREE.AxesHelper(6);
     scene.add(axisHelper);
 }
-
-
 
 function onWindowResize() {
     let perCam = camera as THREE.PerspectiveCamera
@@ -106,16 +104,17 @@ function render() {
     renderer.render(scene, camera);
 }
 
-var animate = function () {
+window.requestAnimationFrame(animate);
+
+function animate() {
     requestAnimationFrame(animate);
+
+    magicCube.updateAnimation();
 
     controls.update();
 
     render();
 };
-
-
-animate();
 
 $("#rotateClockwise").click(function () {
     magicCube.rotate(cubeDirection.Right, rotateDirection.Clockwise, 90);
@@ -123,4 +122,16 @@ $("#rotateClockwise").click(function () {
 
 $("#rotateAntiClockwise").click(function () {
     magicCube.rotate(cubeDirection.Right, rotateDirection.AntiClockwise, 90);
+})
+
+$("#imediateApply").click(function () {
+    magicCube.imediateApply();
+})
+
+$("#rotateClockwiseNoAmimate").click(function () {
+    magicCube.rotate(cubeDirection.Right, rotateDirection.Clockwise, 90, false);
+})
+
+$("#rotateAntiClockwiseNoAmimate").click(function () {
+    magicCube.rotate(cubeDirection.Right, rotateDirection.AntiClockwise, 90, false);
 })

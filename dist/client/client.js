@@ -6,8 +6,10 @@ let renderer;
 let camera;
 let controls;
 let magicCube;
-const MAGICCUBERANKS = 3;
+const MAGICCUBE_RANKS = 3;
+const MAGICCUBE_ROTATE_SPEED = 10;
 initBase();
+initMagicCube();
 createAxis();
 creatPlane();
 createLights();
@@ -57,9 +59,11 @@ function initBase() {
     initCamera(2);
     controls = new OrbitControls(camera, renderer.domElement);
     window.addEventListener('resize', onWindowResize, false);
+}
+function initMagicCube() {
     //绘制魔方
-    magicCube = new MagicCube(scene, MAGICCUBERANKS);
-    // magicCube.rotate(cubeDirection.Right, rotateDirection.AntiClockwise, 10);
+    magicCube = new MagicCube(scene, MAGICCUBE_RANKS);
+    magicCube.setAnimationSpeed(MAGICCUBE_ROTATE_SPEED);
 }
 function createAxis() {
     // 创建坐标轴（RGB颜色 分别代表 XYZ轴）
@@ -78,15 +82,26 @@ function onWindowResize() {
 function render() {
     renderer.render(scene, camera);
 }
-var animate = function () {
+window.requestAnimationFrame(animate);
+function animate() {
     requestAnimationFrame(animate);
+    magicCube.updateAnimation();
     controls.update();
     render();
-};
-animate();
+}
+;
 $("#rotateClockwise").click(function () {
     magicCube.rotate(cubeDirection.Right, rotateDirection.Clockwise, 90);
 });
 $("#rotateAntiClockwise").click(function () {
     magicCube.rotate(cubeDirection.Right, rotateDirection.AntiClockwise, 90);
+});
+$("#imediateApply").click(function () {
+    magicCube.imediateApply();
+});
+$("#rotateClockwiseNoAmimate").click(function () {
+    magicCube.rotate(cubeDirection.Right, rotateDirection.Clockwise, 90, false);
+});
+$("#rotateAntiClockwiseNoAmimate").click(function () {
+    magicCube.rotate(cubeDirection.Right, rotateDirection.AntiClockwise, 90, false);
 });
