@@ -8,11 +8,26 @@
             overflow: hidden;
             margin: 0px;
         }
+        ul {
+            width: 100px;
+            height: 100px;
+            position: absolute;
+        }
+
     </style>
 </head>
 
 <body>
-	<script type="module" src="client.js"></script>
+    <script src="./jquery-1.9.1.js" type="text/javascript"></script>
+    <script type="module" src="client.js"></script>
+    <ul>
+        <li>
+            <button class="test" id="rotateClockwise">Clockwise</button>
+        </li>
+        <li>
+            <button class="test" id="rotateAntiClockwise">AntiClockwise</button>
+        </li>
+    </ul>
 </body>
 
 </html>

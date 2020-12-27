@@ -9,6 +9,7 @@ let renderer: THREE.WebGLRenderer;
 let camera: THREE.Camera;
 let controls: OrbitControls;
 
+let magicCube: MagicCube;
 
 
 const MAGICCUBERANKS = 3;
@@ -78,8 +79,8 @@ function initBase() {
     window.addEventListener('resize', onWindowResize, false);
 
     //绘制魔方
-    let magicCube = new MagicCube(scene, MAGICCUBERANKS);
-    magicCube.rotate(cubeDirection.Right, rotateDirection.AntiClockwise, 10);
+    magicCube = new MagicCube(scene, MAGICCUBERANKS);
+    // magicCube.rotate(cubeDirection.Right, rotateDirection.AntiClockwise, 10);
 }
 
 function createAxis() {
@@ -115,3 +116,11 @@ var animate = function () {
 
 
 animate();
+
+$("#rotateClockwise").click(function () {
+    magicCube.rotate(cubeDirection.Right, rotateDirection.Clockwise, 90);
+})
+
+$("#rotateAntiClockwise").click(function () {
+    magicCube.rotate(cubeDirection.Right, rotateDirection.AntiClockwise, 90);
+})

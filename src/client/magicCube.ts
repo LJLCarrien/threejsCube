@@ -185,8 +185,8 @@ export class MagicCube {
         let arr: Array<THREE.Mesh> = this.getFaceCube(direction);
         let resultAngle: number = rtDirect == rotateDirection.Clockwise ? -1 : 1;
         angle = angle * Math.PI / 180;
-        resultAngle = resultAngle * Math.abs(angle);
         let absAngle = Math.abs(angle);
+        resultAngle = resultAngle * absAngle;
         let midCube = arr[4];
         let midCube_matrix: Matrix4 = midCube.matrix.clone();
 
@@ -201,7 +201,7 @@ export class MagicCube {
             // item.matrix.multiply(new THREE.Matrix4().makeTranslation(offsetPos.x, offsetPos.y, offsetPos.z));
 
             // 把所有方块移动到中心，先旋转，再平移
-            item.matrix.multiply(new THREE.Matrix4().makeRotationX(absAngle));
+            item.matrix.multiply(new THREE.Matrix4().makeRotationX(resultAngle));
             item.matrix.multiply(new THREE.Matrix4().makeTranslation(offsetPos.x, offsetPos.y, offsetPos.z));
         }
     }

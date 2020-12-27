@@ -5,6 +5,7 @@ let scene;
 let renderer;
 let camera;
 let controls;
+let magicCube;
 const MAGICCUBERANKS = 3;
 initBase();
 createAxis();
@@ -57,8 +58,8 @@ function initBase() {
     controls = new OrbitControls(camera, renderer.domElement);
     window.addEventListener('resize', onWindowResize, false);
     //绘制魔方
-    let magicCube = new MagicCube(scene, MAGICCUBERANKS);
-    magicCube.rotate(cubeDirection.Right, rotateDirection.AntiClockwise, 10);
+    magicCube = new MagicCube(scene, MAGICCUBERANKS);
+    // magicCube.rotate(cubeDirection.Right, rotateDirection.AntiClockwise, 10);
 }
 function createAxis() {
     // 创建坐标轴（RGB颜色 分别代表 XYZ轴）
@@ -83,3 +84,9 @@ var animate = function () {
     render();
 };
 animate();
+$("#rotateClockwise").click(function () {
+    magicCube.rotate(cubeDirection.Right, rotateDirection.Clockwise, 90);
+});
+$("#rotateAntiClockwise").click(function () {
+    magicCube.rotate(cubeDirection.Right, rotateDirection.AntiClockwise, 90);
+});
