@@ -1,5 +1,5 @@
 import * as THREE from '/build/three.module.js'
-import { Vector3 } from '/build/three.module.js';
+import { Matrix4, Vector3 } from '/build/three.module.js';
 
 // 以下按照面的渲染顺序排序(上黄下白，前蓝后绿，左橙右红)
 export enum rotateDirection {
@@ -82,7 +82,13 @@ export class MagicCube {
 
         // MeshLambertMaterial
         let cube = new THREE.Mesh(geometry, mats);
-        cube.position.set(x, y, z);
+
+        // cube.position.set(x, y, z);
+        cube.matrixAutoUpdate = false;
+        let cube_matrix = new THREE.Matrix4();
+        cube_matrix.multiply(new THREE.Matrix4().makeTranslation(x, y, z));
+        cube.applyMatrix4(cube_matrix);
+
         this.cubeArr.push(cube);
         this.scene.add(cube);
 
@@ -170,22 +176,33 @@ export class MagicCube {
         return resultArr;
     }
 
+
+
     /**
      * rotate
      */
     public rotate(direction: cubeDirection, rtDirect: rotateDirection, angle: number) {
         let arr: Array<THREE.Mesh> = this.getFaceCube(direction);
         let resultAngle: number = rtDirect == rotateDirection.Clockwise ? -1 : 1;
+        angle = angle * Math.PI / 180;
         resultAngle = resultAngle * Math.abs(angle);
         let absAngle = Math.abs(angle);
-        let midCube: Vector3 = arr[4].position;
-        arr.forEach(item => {
-            item.rotateX(resultAngle);
-            // let oriPos = item.position;
-            // let kb = new Vector3(oriPos.x - midCube.x, oriPos.y - midCube.y, oriPos.z - midCube.z);
-            // kb.y = kb.y * Math.cos(absAngle) - kb.z * Math.sin(absAngle);
-            // kb.z = kb.z * Math.cos(absAngle) + kb.y * Math.sin(absAngle);
-            // item.position.set(oriPos.x, kb.y, kb.z);
-        });
+        let midCube = arr[4];
+        let midCube_matrix: Matrix4 = midCube.matrix.clone();
+
+        for (let i = 0; i < arr.length; i++) {
+            let item = arr[i];
+            item.matrix = midCube_matrix.clone();
+
+            let offsetPos: Vector3 = new Vector3(item.position.x - midCube.position.x, item.position.y - midCube.position.y, item.position.z - midCube.position.z)
+            console.log(i, offsetPos.x, offsetPos.y, offsetPos.z);
+
+            // 验证偏移是否正确
+            // item.matrix.multiply(new THREE.Matrix4().makeTranslation(offsetPos.x, offsetPos.y, offsetPos.z));
+
+            // 把所有方块移动到中心，先旋转，再平移
+            item.matrix.multiply(new THREE.Matrix4().makeRotationX(absAngle));
+            item.matrix.multiply(new THREE.Matrix4().makeTranslation(offsetPos.x, offsetPos.y, offsetPos.z));
+        }
     }
 }

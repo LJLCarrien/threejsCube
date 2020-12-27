@@ -58,7 +58,7 @@ function initBase() {
     window.addEventListener('resize', onWindowResize, false);
     //绘制魔方
     let magicCube = new MagicCube(scene, MAGICCUBERANKS);
-    magicCube.rotate(cubeDirection.Right, rotateDirection.AntiClockwise, 30);
+    magicCube.rotate(cubeDirection.Right, rotateDirection.AntiClockwise, 10);
 }
 function createAxis() {
     // 创建坐标轴（RGB颜色 分别代表 XYZ轴）

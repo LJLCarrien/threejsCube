@@ -79,7 +79,7 @@ function initBase() {
 
     //绘制魔方
     let magicCube = new MagicCube(scene, MAGICCUBERANKS);
-    magicCube.rotate(cubeDirection.Right, rotateDirection.AntiClockwise, 30);
+    magicCube.rotate(cubeDirection.Right, rotateDirection.AntiClockwise, 10);
 }
 
 function createAxis() {
