@@ -76,35 +76,53 @@ function createAxis() {
 }
 function oneKeyDown(e) {
     console.log(e.keyCode);
+    let isNeedRotate = false;
     switch (e.keyCode) {
         case 87:
             console.log("Up");
-            this.curCubeDirection = cubeDirection.Up;
+            curCubeDirection = cubeDirection.Up;
+            isNeedRotate = true;
             break;
         case 83:
             console.log("Down");
-            this.curCubeDirection = cubeDirection.Down;
+            curCubeDirection = cubeDirection.Down;
+            isNeedRotate = true;
             break;
         case 65:
             console.log("Left");
-            this.curCubeDirection = cubeDirection.Left;
+            curCubeDirection = cubeDirection.Left;
+            isNeedRotate = true;
             break;
         case 68:
             console.log("Right");
-            this.curCubeDirection = cubeDirection.Right;
+            curCubeDirection = cubeDirection.Right;
+            isNeedRotate = true;
+            break;
+        case 81:
+            console.log("Front");
+            curCubeDirection = cubeDirection.Front;
+            isNeedRotate = true;
+            break;
+        case 69:
+            console.log("Back");
+            curCubeDirection = cubeDirection.Back;
+            isNeedRotate = true;
             break;
         case 74:
             console.log("J 切换顺时针");
-            this.curRotateDirection = rotateDirection.Clockwise;
+            curRotateDirection = rotateDirection.Clockwise;
             break;
         case 75:
             console.log("K 切换逆时针");
-            this.curRotateDirection = rotateDirection.AntiClockwise;
+            curRotateDirection = rotateDirection.AntiClockwise;
             break;
         default:
             break;
     }
-    magicCube.rotate(this.curCubeDirection, this.curRotateDirection, 90, false);
+    if (isNeedRotate) {
+        console.log(curRotateDirection);
+        magicCube.rotate(curCubeDirection, curRotateDirection, 90);
+    }
 }
 function onWindowResize() {
     let perCam = camera;
@@ -126,17 +144,17 @@ function animate() {
 }
 ;
 $("#rotateClockwise").click(function () {
-    magicCube.rotate(cubeDirection.Right, rotateDirection.Clockwise, 90);
+    magicCube.rotate(cubeDirection.Up, rotateDirection.Clockwise, 90);
 });
 $("#rotateAntiClockwise").click(function () {
-    magicCube.rotate(cubeDirection.Right, rotateDirection.AntiClockwise, 90);
+    magicCube.rotate(cubeDirection.Up, rotateDirection.AntiClockwise, 90);
 });
 $("#imediateApply").click(function () {
     magicCube.imediateApply();
 });
 $("#rotateClockwiseNoAmimate").click(function () {
-    magicCube.rotate(cubeDirection.Right, rotateDirection.Clockwise, 90, false);
+    magicCube.rotate(cubeDirection.Up, rotateDirection.Clockwise, 90, false);
 });
 $("#rotateAntiClockwiseNoAmimate").click(function () {
-    magicCube.rotate(cubeDirection.Right, rotateDirection.AntiClockwise, 90, false);
+    magicCube.rotate(cubeDirection.Up, rotateDirection.AntiClockwise, 90, false);
 });

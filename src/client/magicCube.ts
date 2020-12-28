@@ -211,10 +211,17 @@ export class MagicCube {
 
     private rotateImediate(direction: cubeDirection, rtDirect: rotateDirection, angle: number) {
         let arr: Array<THREE.Mesh> = this.getFaceCube(direction);
-        let resultAngle: number = rtDirect == rotateDirection.Clockwise ? -1 : 1;
+
+        let resultAngle: number = 0;
+        if (direction == cubeDirection.Right || direction == cubeDirection.Up || direction == cubeDirection.Front) {
+            resultAngle = rtDirect == rotateDirection.Clockwise ? -1 : 1;
+        } else if (direction == cubeDirection.Left || direction == cubeDirection.Down || direction == cubeDirection.Back) {
+            resultAngle = rtDirect == rotateDirection.Clockwise ? 1 : -1;
+        }
         angle = angle * Math.PI / 180;
         let absAngle = Math.abs(angle);
         resultAngle = resultAngle * absAngle;
+        console.log("resultAngle: ", resultAngle);
         let midCube = arr[4];
         let midCube_matrix: Matrix4 = midCube.matrix.clone();
 
@@ -229,8 +236,18 @@ export class MagicCube {
             // item.matrix.multiply(new THREE.Matrix4().makeTranslation(offsetPos.x, offsetPos.y, offsetPos.z));
 
             // 把所有方块移动到中心，先旋转，再平移
-            item.matrix.multiply(new THREE.Matrix4().makeRotationX(resultAngle));
-            item.matrix.multiply(new THREE.Matrix4().makeTranslation(offsetPos.x, offsetPos.y, offsetPos.z));
+            if (direction == cubeDirection.Left || direction == cubeDirection.Right) {
+                item.matrix.multiply(new THREE.Matrix4().makeRotationX(resultAngle));
+                item.matrix.multiply(new THREE.Matrix4().makeTranslation(offsetPos.x, offsetPos.y, offsetPos.z));
+            }
+            else if (direction == cubeDirection.Up || direction == cubeDirection.Down) {
+                item.matrix.multiply(new THREE.Matrix4().makeRotationY(resultAngle));
+                item.matrix.multiply(new THREE.Matrix4().makeTranslation(offsetPos.x, offsetPos.y, offsetPos.z))
+            }
+            else if (direction == cubeDirection.Front || direction == cubeDirection.Back) {
+                item.matrix.multiply(new THREE.Matrix4().makeRotationZ(resultAngle));
+                item.matrix.multiply(new THREE.Matrix4().makeTranslation(offsetPos.x, offsetPos.y, offsetPos.z))
+            }
         }
     }
 
