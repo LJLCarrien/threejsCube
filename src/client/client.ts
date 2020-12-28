@@ -13,6 +13,9 @@ let magicCube: MagicCube;
 const MAGICCUBE_RANKS = 3;
 const MAGICCUBE_ROTATE_SPEED = 10;
 
+let curCubeDirection: cubeDirection = cubeDirection.None;
+let curRotateDirection: rotateDirection = rotateDirection.Clockwise;
+
 initBase();
 initMagicCube();
 createAxis();
@@ -74,7 +77,9 @@ function initBase() {
     initCamera(2);
 
     controls = new OrbitControls(camera, renderer.domElement);
+    window.requestAnimationFrame(animate);
     window.addEventListener('resize', onWindowResize, false);
+    window.addEventListener('keydown', oneKeyDown);
 }
 
 function initMagicCube() {
@@ -89,6 +94,39 @@ function createAxis() {
     scene.add(axisHelper);
 }
 
+function oneKeyDown(e: KeyboardEvent) {
+    console.log(e.keyCode);
+    switch (e.keyCode) {
+        case 87:
+            console.log("Up");
+            this.curCubeDirection = cubeDirection.Up;
+            break;
+        case 83:
+            console.log("Down");
+            this.curCubeDirection = cubeDirection.Down;
+            break;
+        case 65:
+            console.log("Left");
+            this.curCubeDirection = cubeDirection.Left;
+
+            break;
+        case 68:
+            console.log("Right");
+            this.curCubeDirection = cubeDirection.Right;
+            break;
+        case 74:
+            console.log("J 切换顺时针");
+            this.curRotateDirection = rotateDirection.Clockwise;
+            break;
+        case 75:
+            console.log("K 切换逆时针");
+            this.curRotateDirection = rotateDirection.AntiClockwise;
+            break;
+        default:
+            break;
+    }
+    magicCube.rotate(this.curCubeDirection, this.curRotateDirection, 90, false);
+}
 function onWindowResize() {
     let perCam = camera as THREE.PerspectiveCamera
     if (perCam != null) {
@@ -104,13 +142,11 @@ function render() {
     renderer.render(scene, camera);
 }
 
-window.requestAnimationFrame(animate);
 
 function animate() {
     requestAnimationFrame(animate);
 
     magicCube.updateAnimation();
-
     controls.update();
 
     render();

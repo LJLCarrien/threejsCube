@@ -204,7 +204,7 @@ export class MagicCube {
             let item = arr[i];
             item.matrix = midCube_matrix.clone();
             let offsetPos = new Vector3(item.position.x - midCube.position.x, item.position.y - midCube.position.y, item.position.z - midCube.position.z);
-            console.log(i, offsetPos.x, offsetPos.y, offsetPos.z);
+            // console.log(i, offsetPos.x, offsetPos.y, offsetPos.z);
             // 验证偏移是否正确
             // item.matrix.multiply(new THREE.Matrix4().makeTranslation(offsetPos.x, offsetPos.y, offsetPos.z));
             // 把所有方块移动到中心，先旋转，再平移

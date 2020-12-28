@@ -8,6 +8,8 @@ let controls;
 let magicCube;
 const MAGICCUBE_RANKS = 3;
 const MAGICCUBE_ROTATE_SPEED = 10;
+let curCubeDirection = cubeDirection.None;
+let curRotateDirection = rotateDirection.Clockwise;
 initBase();
 initMagicCube();
 createAxis();
@@ -58,7 +60,9 @@ function initBase() {
     document.body.appendChild(renderer.domElement);
     initCamera(2);
     controls = new OrbitControls(camera, renderer.domElement);
+    window.requestAnimationFrame(animate);
     window.addEventListener('resize', onWindowResize, false);
+    window.addEventListener('keydown', oneKeyDown);
 }
 function initMagicCube() {
     //绘制魔方
@@ -69,6 +73,38 @@ function createAxis() {
     // 创建坐标轴（RGB颜色 分别代表 XYZ轴）
     var axisHelper = new THREE.AxesHelper(6);
     scene.add(axisHelper);
+}
+function oneKeyDown(e) {
+    console.log(e.keyCode);
+    switch (e.keyCode) {
+        case 87:
+            console.log("Up");
+            this.curCubeDirection = cubeDirection.Up;
+            break;
+        case 83:
+            console.log("Down");
+            this.curCubeDirection = cubeDirection.Down;
+            break;
+        case 65:
+            console.log("Left");
+            this.curCubeDirection = cubeDirection.Left;
+            break;
+        case 68:
+            console.log("Right");
+            this.curCubeDirection = cubeDirection.Right;
+            break;
+        case 74:
+            console.log("J 切换顺时针");
+            this.curRotateDirection = rotateDirection.Clockwise;
+            break;
+        case 75:
+            console.log("K 切换逆时针");
+            this.curRotateDirection = rotateDirection.AntiClockwise;
+            break;
+        default:
+            break;
+    }
+    magicCube.rotate(this.curCubeDirection, this.curRotateDirection, 90, false);
 }
 function onWindowResize() {
     let perCam = camera;
@@ -82,7 +118,6 @@ function onWindowResize() {
 function render() {
     renderer.render(scene, camera);
 }
-window.requestAnimationFrame(animate);
 function animate() {
     requestAnimationFrame(animate);
     magicCube.updateAnimation();
