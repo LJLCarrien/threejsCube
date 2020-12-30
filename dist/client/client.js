@@ -147,7 +147,7 @@ $("#rotateClockwise").click(function () {
     magicCube.rotate(cubeDirection.Up, rotateDirection.Clockwise, 90);
 });
 $("#rotateAntiClockwise").click(function () {
-    magicCube.rotate(cubeDirection.Up, rotateDirection.AntiClockwise, 90);
+    magicCube.setMide(cubeDirection.Front, rotateDirection.AntiClockwise, 90);
 });
 $("#imediateApply").click(function () {
     magicCube.imediateApply();
