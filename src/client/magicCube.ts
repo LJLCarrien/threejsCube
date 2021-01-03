@@ -181,6 +181,11 @@ export class MagicCube {
                     break;
             }
         }
+        for(let i=0;i<resultArr.length;i++)
+        {
+            console.log(resultArr[i].position);
+        }
+
         return resultArr;
     }
 
@@ -217,7 +222,7 @@ export class MagicCube {
         }
     }
 
-    private rotateImediate(direction: cubeDirection, rtDirect: rotateDirection, angle: number) {
+    public makeMid(direction: cubeDirection, rtDirect: rotateDirection, angle: number) {
         let arr: Array<THREE.Mesh> = this.getFaceCube(direction);
 
         let resultAngle: number = 0;
@@ -237,32 +242,16 @@ export class MagicCube {
             let item = arr[i];
             item.matrix = midCube_matrix.clone();
 
-            let offsetPos: Vector3 = new Vector3(item.position.x - midCube.position.x, item.position.y - midCube.position.y, item.position.z - midCube.position.z)
+            // let offsetPos: Vector3 = new Vector3(item.position.x - midCube.position.x, item.position.y - midCube.position.y, item.position.z - midCube.position.z)
             // console.log(i, offsetPos.x, offsetPos.y, offsetPos.z);
 
             // 验证偏移是否正确
             // item.matrix.multiply(new THREE.Matrix4().makeTranslation(offsetPos.x, offsetPos.y, offsetPos.z));
 
-            // 把所有方块移动到中心，先旋转，再平移
-            if (direction == cubeDirection.Left || direction == cubeDirection.Right) {
-                item.matrix.multiply(new THREE.Matrix4().makeRotationX(resultAngle));
-                item.matrix.multiply(new THREE.Matrix4().makeTranslation(offsetPos.x, offsetPos.y, offsetPos.z));
-            }
-            else if (direction == cubeDirection.Up || direction == cubeDirection.Down) {
-                item.matrix.multiply(new THREE.Matrix4().makeRotationY(resultAngle));
-                item.matrix.multiply(new THREE.Matrix4().makeTranslation(offsetPos.x, offsetPos.y, offsetPos.z))
-            }
-            else if (direction == cubeDirection.Front || direction == cubeDirection.Back) {
-                item.matrix.multiply(new THREE.Matrix4().makeRotationZ(resultAngle));
-                item.matrix.multiply(new THREE.Matrix4().makeTranslation(offsetPos.x, offsetPos.y, offsetPos.z))
-            }
-            // console.log(item.position.clone().applyMatrix4(item.matrix));
-            console.log(item.position);
         }
-
     }
 
-    public setMide(direction: cubeDirection, rtDirect: rotateDirection, angle: number) {
+    private rotateImediate(direction: cubeDirection, rtDirect: rotateDirection, angle: number) {
         let arr: Array<THREE.Mesh> = this.getFaceCube(direction);
 
         let resultAngle: number = 0;

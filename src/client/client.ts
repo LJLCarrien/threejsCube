@@ -175,9 +175,8 @@ $("#rotateClockwise").click(function () {
 })
 
 $("#rotateAntiClockwise").click(function () {
-    magicCube.setMide(cubeDirection.Front, rotateDirection.AntiClockwise, 90);
+    magicCube.makeMid(cubeDirection.Front, rotateDirection.AntiClockwise, 90);
 })
-
 
 $("#imediateApply").click(function () {
     magicCube.imediateApply();
