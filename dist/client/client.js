@@ -85,6 +85,7 @@ function updateCylinder(angle) {
     cylinder_matrix.multiply(new THREE.Matrix4().makeRotationZ(angle * Math.PI / 180));
     cylinder_matrix.multiply(new THREE.Matrix4().makeTranslation(0.0, 0.75, 0.0));
     cylinder.applyMatrix4(cylinder_matrix);
+    console.log(cylinder.position);
 }
 function initBase() {
     scene = new THREE.Scene();
