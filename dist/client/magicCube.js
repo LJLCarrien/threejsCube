@@ -194,31 +194,37 @@ export class MagicCube {
                 case cubeDirection.Right:
                     if (this.isFloatSame(position.x, this.cubeRadius + (this.maxRanks - 1) * (this.cubeDiameter + this.cubeOffset))) {
                         resultArr.push(this.cubeArr[i]);
+                        resultArr.sort(this.sortBy(new Array("y", "z"), new Array(false, false)));
                     }
                     break;
                 case cubeDirection.Left:
                     if (this.isFloatSame(position.x, this.cubeRadius)) {
                         resultArr.push(this.cubeArr[i]);
+                        resultArr.sort(this.sortBy(new Array("y", "z"), new Array(false, false)));
                     }
                     break;
                 case cubeDirection.Up:
                     if (this.isFloatSame(position.y, this.cubeRadius + (this.maxRanks - 1) * (this.cubeDiameter + this.cubeOffset))) {
                         resultArr.push(this.cubeArr[i]);
+                        resultArr.sort(this.sortBy(new Array("z", "x"), new Array(true, true)));
                     }
                     break;
                 case cubeDirection.Down:
                     if (this.isFloatSame(position.y, this.cubeRadius)) {
                         resultArr.push(this.cubeArr[i]);
+                        resultArr.sort(this.sortBy(new Array("z", "x"), new Array(true, true)));
                     }
                     break;
                 case cubeDirection.Front:
                     if (this.isFloatSame(position.z, this.cubeRadius + (this.maxRanks - 1) * (this.cubeDiameter + this.cubeOffset))) {
                         resultArr.push(this.cubeArr[i]);
+                        resultArr.sort(this.sortBy(new Array("y", "x"), new Array(false, true)));
                     }
                     break;
                 case cubeDirection.Back:
                     if (this.isFloatSame(position.z, this.cubeRadius)) {
                         resultArr.push(this.cubeArr[i]);
+                        resultArr.sort(this.sortBy(new Array("y", "x"), new Array(false, true)));
                     }
                     break;
                 default:
@@ -231,6 +237,19 @@ export class MagicCube {
         // }
         return resultArr;
     }
+    sortBy(names, ascendings) {
+        return function (x, y) {
+            for (let i = 0; i < names.length; i++) {
+                const element = names[i];
+                if (x.position[element] != y.position[element]) {
+                    if (x.position[element] - y.position[element] < 0)
+                        return ascendings[i] ? -1 : 1;
+                    return ascendings[i] ? 1 : -1;
+                }
+            }
+            return 0;
+        };
+    }
     getCubes() {
         return this.cubeArr;
     }
@@ -238,9 +257,10 @@ export class MagicCube {
         this.direction = cubeDirection.None;
         this.rtDirect = rotateDirection.Clockwise;
         this.targetAngle = 0;
+        this.animCubeArr = null;
     }
     imediateApply() {
-        this.rotateImediate(this.direction, this.rtDirect, this.targetAngle);
+        this.rotateImediate(this.animCubeArr, this.direction, this.rtDirect, this.targetAngle);
         this.resetAnimateInfo();
     }
     rotate(direction, rtDirect, angle, isNeedAnimation = true) {
@@ -252,12 +272,14 @@ export class MagicCube {
             this.direction = direction;
             this.rtDirect = rtDirect;
             this.targetAngle = angle;
+            this.animCubeArr = this.getFaceCube(direction);
         }
         else {
             if (this.isAnimating()) {
                 this.imediateApply();
             }
-            this.rotateImediate(direction, rtDirect, angle);
+            let arr = this.getFaceCube(direction);
+            this.rotateImediate(arr, direction, rtDirect, angle);
         }
     }
     makeMid(direction, rtDirect, angle) {
@@ -284,8 +306,33 @@ export class MagicCube {
             // item.matrix.multiply(new THREE.Matrix4().makeTranslation(offsetPos.x, offsetPos.y, offsetPos.z));
         }
     }
-    rotateImediate(direction, rtDirect, angle) {
-        let arr = this.getFaceCube(direction);
+    getOffset(direction, index) {
+        switch (direction) {
+            case cubeDirection.Right:
+                switch (index) {
+                    case 0:
+                        return new Vector3(0, this.cubeDiameter + this.cubeOffset, this.cubeDiameter + this.cubeOffset);
+                    case 1:
+                        return new Vector3(0, this.cubeDiameter + this.cubeOffset, 0);
+                    case 2:
+                        return new Vector3(0, this.cubeDiameter + this.cubeOffset, -1 * (this.cubeDiameter + this.cubeOffset));
+                    case 3:
+                        return new Vector3(0, 0, this.cubeDiameter + this.cubeOffset);
+                    case 5:
+                        return new Vector3(0, 0, -1 * (this.cubeDiameter + this.cubeOffset));
+                    case 6:
+                        return new Vector3(0, -1 * (this.cubeDiameter + this.cubeOffset), this.cubeDiameter + this.cubeOffset);
+                    case 7:
+                        return new Vector3(0, -1 * (this.cubeDiameter + this.cubeOffset), 0);
+                    case 8:
+                        return new Vector3(0, -1 * (this.cubeDiameter + this.cubeOffset), -1 * (this.cubeDiameter + this.cubeOffset));
+                }
+                break;
+            default:
+                return new Vector3();
+        }
+    }
+    rotateImediate(arr, direction, rtDirect, angle) {
         let resultAngle = 0;
         if (direction == cubeDirection.Right || direction == cubeDirection.Up || direction == cubeDirection.Front) {
             resultAngle = rtDirect == rotateDirection.Clockwise ? -1 : 1;
@@ -297,34 +344,66 @@ export class MagicCube {
         let absAngle = Math.abs(angle);
         resultAngle = resultAngle * absAngle;
         console.log("resultAngle: ", resultAngle);
-        let midCube = this.getMidCube(direction);
-        let midCube_matrix = midCube.matrix.clone();
+        let midCube = arr[4];
         // console.log("++++++++++++++++++++++++++++++++++");
+        if (direction == cubeDirection.Left || direction == cubeDirection.Right) {
+            midCube.matrix.multiply(new THREE.Matrix4().makeRotationX(resultAngle));
+        }
+        else if (direction == cubeDirection.Up || direction == cubeDirection.Down) {
+            midCube.matrix.multiply(new THREE.Matrix4().makeRotationY(resultAngle));
+        }
+        else if (direction == cubeDirection.Front || direction == cubeDirection.Back) {
+            midCube.matrix.multiply(new THREE.Matrix4().makeRotationZ(resultAngle));
+        }
+        midCube.matrix.decompose(midCube.position, midCube.quaternion, midCube.scale);
         for (let i = 0; i < arr.length; i++) {
             let item = arr[i];
-            item.matrix = midCube_matrix.clone();
-            let offsetPos = new Vector3(item.position.x - midCube.position.x, item.position.y - midCube.position.y, item.position.z - midCube.position.z);
+            if (item == midCube)
+                continue;
+            let offsetPos = this.getOffset(direction, i); // new Vector3(item.position.x - midCube.position.x, item.position.y - midCube.position.y, item.position.z - midCube.position.z)
             // console.log(i, offsetPos.x, offsetPos.y, offsetPos.z);
+            item.matrix = midCube.matrix.clone();
             // 验证偏移是否正确
             // item.matrix.multiply(new THREE.Matrix4().makeTranslation(offsetPos.x, offsetPos.y, offsetPos.z));
             // 把所有方块移动到中心，先旋转，再平移
             if (direction == cubeDirection.Left || direction == cubeDirection.Right) {
-                item.matrix.multiply(new THREE.Matrix4().makeRotationX(resultAngle));
                 item.matrix.multiply(new THREE.Matrix4().makeTranslation(offsetPos.x, offsetPos.y, offsetPos.z));
+                // item.matrix.multiply(new THREE.Matrix4().makeTranslation(0, -1 * (this.cubeDiameter + this.cubeOffset), 0));
             }
             else if (direction == cubeDirection.Up || direction == cubeDirection.Down) {
-                item.matrix.multiply(new THREE.Matrix4().makeRotationY(resultAngle));
                 item.matrix.multiply(new THREE.Matrix4().makeTranslation(offsetPos.x, offsetPos.y, offsetPos.z));
             }
             else if (direction == cubeDirection.Front || direction == cubeDirection.Back) {
-                item.matrix.multiply(new THREE.Matrix4().makeRotationZ(resultAngle));
                 item.matrix.multiply(new THREE.Matrix4().makeTranslation(offsetPos.x, offsetPos.y, offsetPos.z));
             }
-            // item.matrix.decompose(item.position, item.quaternion, item.scale);
-            // console.log(item.position.clone().applyMatrix4(item.matrix));
-            // console.log(item.position);
+            item.matrix.decompose(item.position, item.quaternion, item.scale);
         }
-        console.log('mid: ', midCube.position);
+        // for (let i = 0; i < arr.length; i++) {
+        //     let item = arr[i];
+        //     item.matrix = midCube_matrix.clone();
+        //     let offsetPos: Vector3 = new Vector3(item.position.x - midCube.position.x, item.position.y - midCube.position.y, item.position.z - midCube.position.z)
+        //     // console.log(i, offsetPos.x, offsetPos.y, offsetPos.z);
+        //     // 验证偏移是否正确
+        //     // item.matrix.multiply(new THREE.Matrix4().makeTranslation(offsetPos.x, offsetPos.y, offsetPos.z));
+        //     // 把所有方块移动到中心，先旋转，再平移
+        //     if (direction == cubeDirection.Left || direction == cubeDirection.Right) {
+        //         item.matrix.multiply(new THREE.Matrix4().makeRotationX(resultAngle));
+        //         item.matrix.multiply(new THREE.Matrix4().makeTranslation(offsetPos.x, offsetPos.y, offsetPos.z));
+        //     }
+        //     else if (direction == cubeDirection.Up || direction == cubeDirection.Down) {
+        //         item.matrix.multiply(new THREE.Matrix4().makeRotationY(resultAngle));
+        //         item.matrix.multiply(new THREE.Matrix4().makeTranslation(offsetPos.x, offsetPos.y, offsetPos.z))
+        //     }
+        //     else if (direction == cubeDirection.Front || direction == cubeDirection.Back) {
+        //         item.matrix.multiply(new THREE.Matrix4().makeRotationZ(resultAngle));
+        //         item.matrix.multiply(new THREE.Matrix4().makeTranslation(offsetPos.x, offsetPos.y, offsetPos.z))
+        //     }
+        //     // item.updateMatrix();
+        //     // item.matrix.decompose(item.position, new Quaternion(), new Vector3());
+        //     // console.log(item.position.clone().applyMatrix4(item.matrix));
+        //     // console.log(item.position);
+        // }
+        // // console.log('mid: ', midCube.position);
     }
     isAnimating() {
         return this.targetAngle > 0;
@@ -336,13 +415,13 @@ export class MagicCube {
         if (this.targetAngle > 0) {
             let angle = Math.min(this.targetAngle, this.animationSpeed);
             this.targetAngle -= angle;
-            this.rotateImediate(this.direction, this.rtDirect, angle);
+            this.rotateImediate(this.animCubeArr, this.direction, this.rtDirect, angle);
             if (this.targetAngle == 0) {
                 this.resetAnimateInfo();
-                for (let i = 0; i < this.cubeArr.length; i++) {
-                    let item = this.cubeArr[i];
-                    item.matrix.decompose(item.position, item.quaternion, item.scale);
-                }
+                // for (let i = 0; i < this.cubeArr.length; i++) {
+                //     let item = this.cubeArr[i];
+                //     item.matrix.decompose(item.position, item.quaternion, item.scale);
+                // }
             }
         }
     }

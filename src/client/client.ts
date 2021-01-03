@@ -171,7 +171,8 @@ function animate() {
 };
 
 $("#rotateClockwise").click(function () {
-    magicCube.rotate(cubeDirection.Up, rotateDirection.Clockwise, 90);
+    // magicCube.rotate(cubeDirection.Up, rotateDirection.Clockwise, 90);
+    magicCube.updateAnimation();
 })
 
 $("#rotateAntiClockwise").click(function () {
@@ -206,7 +207,7 @@ function onDocumentMouseDown(event) {
 
     if (intersects.length > 0) {
         let obj = intersects[0].object;
-        console.log(obj.position, obj.quaternion, obj.scale);
+        console.log(obj,obj.position, obj.quaternion, obj.scale);
     }
 }
 window.addEventListener('click', onDocumentMouseDown, false);
