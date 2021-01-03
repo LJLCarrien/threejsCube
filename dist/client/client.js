@@ -7,13 +7,13 @@ let camera;
 let controls;
 let magicCube;
 const MAGICCUBE_RANKS = 3;
-const MAGICCUBE_ROTATE_SPEED = 10;
+const MAGICCUBE_ROTATE_SPEED = 1;
 let curCubeDirection = cubeDirection.None;
 let curRotateDirection = rotateDirection.Clockwise;
 initBase();
 initMagicCube();
 createAxis();
-creatPlane();
+// creatPlane();
 createLights();
 function createLights() {
     // 添加环境光，提高场景亮度
@@ -48,7 +48,7 @@ function initCamera(type) {
     else {
         // 透视摄像机
         camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 1000);
-        camera.position.z = 8;
+        camera.position.set(12, 12, 12);
     }
 }
 function initBase() {
@@ -71,7 +71,7 @@ function initMagicCube() {
 }
 function createAxis() {
     // 创建坐标轴（RGB颜色 分别代表 XYZ轴）
-    var axisHelper = new THREE.AxesHelper(6);
+    var axisHelper = new THREE.AxesHelper(10);
     scene.add(axisHelper);
 }
 function oneKeyDown(e) {

@@ -31,7 +31,7 @@ export class MagicCube {
 
     private maxRanks: number = 0;
     private cubeOffset: number = 0.1;
-    private cubeRadius: number = 0.5;
+    private cubeRadius: number = 1;
     private cubeDiameter: number = this.cubeRadius * 2;
     private scene: THREE.Scene;
     private cubeArr: Array<THREE.Mesh>;
@@ -89,6 +89,9 @@ export class MagicCube {
         cube_matrix.multiply(new THREE.Matrix4().makeTranslation(x, y, z));
         cube.applyMatrix4(cube_matrix);
 
+        var cubeAxis = new THREE.AxesHelper(2);
+        cube.add(cubeAxis);
+
         this.cubeArr.push(cube);
         this.scene.add(cube);
 
@@ -145,7 +148,8 @@ export class MagicCube {
         let resultArr = new Array<THREE.Mesh>();
         for (let i = 0; i < this.cubeArr.length; i++) {
 
-            let position = new THREE.Vector3(0, 0, 0).applyMatrix4(this.cubeArr[i].matrix);
+            // let position = new THREE.Vector3(0, 0, 0).applyMatrix4(this.cubeArr[i].matrix);
+            let position = this.cubeArr[i].position;
             switch (direction) {
                 case cubeDirection.Right:
                     if (this.isFloatSame(position.x, this.cubeRadius + (this.maxRanks - 1) * (this.cubeDiameter + this.cubeOffset))) {
@@ -181,8 +185,8 @@ export class MagicCube {
                     break;
             }
         }
-        for(let i=0;i<resultArr.length;i++)
-        {
+        console.log('------------------------')
+        for (let i = 0; i < resultArr.length; i++) {
             console.log(resultArr[i].position);
         }
 
@@ -266,6 +270,7 @@ export class MagicCube {
         console.log("resultAngle: ", resultAngle);
         let midCube = arr[4];
         let midCube_matrix: Matrix4 = midCube.matrix.clone();
+        console.log("++++++++++++++++++++++++++++++++++");
 
         for (let i = 0; i < arr.length; i++) {
             let item = arr[i];
@@ -290,6 +295,7 @@ export class MagicCube {
                 item.matrix.multiply(new THREE.Matrix4().makeRotationZ(resultAngle));
                 item.matrix.multiply(new THREE.Matrix4().makeTranslation(offsetPos.x, offsetPos.y, offsetPos.z))
             }
+            // item.matrix.decompose(item.position, item.quaternion, item.scale);
             // console.log(item.position.clone().applyMatrix4(item.matrix));
             console.log(item.position);
         }
@@ -313,6 +319,11 @@ export class MagicCube {
 
             if (this.targetAngle == 0) {
                 this.resetAnimateInfo();
+
+                for (let i = 0; i < this.cubeArr.length; i++) {
+                    let item = this.cubeArr[i];
+                    item.matrix.decompose(item.position, item.quaternion, item.scale);
+                }
             }
         }
     }
