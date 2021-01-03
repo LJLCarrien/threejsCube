@@ -61,7 +61,7 @@ function initCamera(type: number) {
     else {
         // 透视摄像机
         camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 1000);
-        camera.position.set(12,12,12);
+        camera.position.set(12, 12, 12);
     }
 }
 
@@ -189,3 +189,24 @@ $("#rotateClockwiseNoAmimate").click(function () {
 $("#rotateAntiClockwiseNoAmimate").click(function () {
     magicCube.rotate(cubeDirection.Up, rotateDirection.AntiClockwise, 90, false);
 })
+
+
+var raycaster = new THREE.Raycaster();
+var mouse = new THREE.Vector2();
+function onDocumentMouseDown(event) {
+
+    event.preventDefault();
+
+    mouse.x = (event.clientX / renderer.domElement.clientWidth) * 2 - 1;
+    mouse.y = - (event.clientY / renderer.domElement.clientHeight) * 2 + 1;
+
+    raycaster.setFromCamera(mouse, camera);
+
+    var intersects = raycaster.intersectObjects(magicCube.getCubes());
+
+    if (intersects.length > 0) {
+        let obj = intersects[0].object;
+        console.log(obj.position, obj.quaternion, obj.scale);
+    }
+}
+window.addEventListener('click', onDocumentMouseDown, false);

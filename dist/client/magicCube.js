@@ -133,6 +133,58 @@ export class MagicCube {
         result = Math.abs(a - b) <= 1e-8;
         return result;
     }
+    getMidCube(direction) {
+        for (let i = 0; i < this.cubeArr.length; i++) {
+            let item = this.cubeArr[i];
+            let position = item.position;
+            switch (direction) {
+                case cubeDirection.Right:
+                    // x: 5.2, y: 3.1, z: 3.1
+                    if (this.isFloatSame(position.x, 2 * this.cubeDiameter + 2 * this.cubeOffset + this.cubeRadius) &&
+                        this.isFloatSame(position.y, this.cubeDiameter + this.cubeOffset + this.cubeRadius) &&
+                        this.isFloatSame(position.z, this.cubeDiameter + this.cubeOffset + this.cubeRadius))
+                        return item;
+                    break;
+                case cubeDirection.Left:
+                    // x: 1, y: 3.1, z: 3.1
+                    if (this.isFloatSame(position.x, this.cubeRadius) &&
+                        this.isFloatSame(position.y, this.cubeDiameter + this.cubeOffset + this.cubeRadius) &&
+                        this.isFloatSame(position.z, this.cubeDiameter + this.cubeOffset + this.cubeRadius))
+                        return item;
+                    break;
+                case cubeDirection.Up:
+                    // x: 3.1, y: 5.2, z: 3.1,
+                    if (this.isFloatSame(position.x, this.cubeDiameter + this.cubeOffset + this.cubeRadius) &&
+                        this.isFloatSame(position.y, 2 * this.cubeDiameter + 2 * this.cubeOffset + this.cubeRadius) &&
+                        this.isFloatSame(position.z, this.cubeDiameter + this.cubeOffset + this.cubeRadius))
+                        return item;
+                    break;
+                case cubeDirection.Down:
+                    // x: 3.1, y: 1, z: 3.1
+                    if (this.isFloatSame(position.x, this.cubeDiameter + this.cubeOffset + this.cubeRadius) &&
+                        this.isFloatSame(position.y, this.cubeRadius) &&
+                        this.isFloatSame(position.z, this.cubeDiameter + this.cubeOffset + this.cubeRadius))
+                        return item;
+                    break;
+                case cubeDirection.Front:
+                    // x: 3.1, y: 3.1, z: 5.2
+                    if (this.isFloatSame(position.x, this.cubeDiameter + this.cubeOffset + this.cubeRadius) &&
+                        this.isFloatSame(position.y, this.cubeDiameter + this.cubeOffset + this.cubeRadius) &&
+                        this.isFloatSame(position.z, 2 * this.cubeDiameter + 2 * this.cubeOffset + this.cubeRadius))
+                        return item;
+                    break;
+                case cubeDirection.Back:
+                    // x: 3.1, y: 3.1, z: 1
+                    if (this.isFloatSame(position.x, this.cubeDiameter + this.cubeOffset + this.cubeRadius) &&
+                        this.isFloatSame(position.y, this.cubeDiameter + this.cubeOffset + this.cubeRadius) &&
+                        this.isFloatSame(position.z, this.cubeRadius))
+                        return item;
+                    break;
+                default:
+                    break;
+            }
+        }
+    }
     getFaceCube(direction) {
         let resultArr = new Array();
         for (let i = 0; i < this.cubeArr.length; i++) {
@@ -173,11 +225,14 @@ export class MagicCube {
                     break;
             }
         }
-        console.log('------------------------');
-        for (let i = 0; i < resultArr.length; i++) {
-            console.log(resultArr[i].position);
-        }
+        // console.log('------------------------')
+        // for (let i = 0; i < resultArr.length; i++) {
+        //     console.log(resultArr[i].position);
+        // }
         return resultArr;
+    }
+    getCubes() {
+        return this.cubeArr;
     }
     resetAnimateInfo() {
         this.direction = cubeDirection.None;
@@ -242,9 +297,9 @@ export class MagicCube {
         let absAngle = Math.abs(angle);
         resultAngle = resultAngle * absAngle;
         console.log("resultAngle: ", resultAngle);
-        let midCube = arr[4];
+        let midCube = this.getMidCube(direction);
         let midCube_matrix = midCube.matrix.clone();
-        console.log("++++++++++++++++++++++++++++++++++");
+        // console.log("++++++++++++++++++++++++++++++++++");
         for (let i = 0; i < arr.length; i++) {
             let item = arr[i];
             item.matrix = midCube_matrix.clone();
@@ -267,8 +322,9 @@ export class MagicCube {
             }
             // item.matrix.decompose(item.position, item.quaternion, item.scale);
             // console.log(item.position.clone().applyMatrix4(item.matrix));
-            console.log(item.position);
+            // console.log(item.position);
         }
+        console.log('mid: ', midCube.position);
     }
     isAnimating() {
         return this.targetAngle > 0;
