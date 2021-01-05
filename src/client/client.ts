@@ -95,7 +95,7 @@ function createAxis() {
 }
 
 function oneKeyDown(e: KeyboardEvent) {
-    console.log(e.keyCode);
+    // console.log(e.keyCode);
     let isNeedRotate = false;
     switch (e.keyCode) {
         case 87:
@@ -141,7 +141,7 @@ function oneKeyDown(e: KeyboardEvent) {
     }
 
     if (isNeedRotate) {
-        console.log(curRotateDirection)
+        // console.log(curRotateDirection)
         magicCube.rotate(curCubeDirection, curRotateDirection, 90);
     }
 }

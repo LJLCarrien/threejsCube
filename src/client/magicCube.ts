@@ -70,9 +70,9 @@ export class MagicCube {
 
         for (var i = 0; i < geometry.faces.length; i++) {
             let boxColor: string = cubeColor.Black;
-            // if (dirs.includes(i)) {
-            boxColor = this.getCubeColor(i);
-            // }
+            if (dirs.includes(i)) {
+                boxColor = this.getCubeColor(i);
+            }
 
             let material = new THREE.MeshBasicMaterial({
                 color: boxColor, wireframe: false
@@ -335,16 +335,28 @@ export class MagicCube {
         angle = angle * Math.PI / 180;
         let absAngle = Math.abs(angle);
         resultAngle = resultAngle * absAngle;
-        console.log("resultAngle: ", resultAngle);
+        // console.log("resultAngle: ", resultAngle);
         let midCube = this.getMidCube(direction);
         let midCube_matrix: Matrix4 = midCube.matrix;
         // console.log("++++++++++++++++++++++++++++++++++");
+
+        let xAxis: Vector3 = new Vector3();
+        let yAxis: Vector3 = new Vector3();
+        let zAxis: Vector3 = new Vector3();
+        midCube_matrix.extractBasis(xAxis, yAxis, zAxis);
+        let newMideCubeMatrix = new Matrix4().makeBasis(xAxis.normalize(), yAxis.normalize(), zAxis.normalize());
+        console.log('new xyz: ', xAxis.normalize(), yAxis.normalize(), zAxis.normalize());
 
         for (let i = 0; i < arr.length; i++) {
             let item = arr[i];
             item.matrix = midCube_matrix.clone();
 
-            // item.visible = item == midCube;
+            let offsetPos: Vector3 = new Vector3(item.position.x - midCube.position.x, item.position.y - midCube.position.y, item.position.z - midCube.position.z)
+            offsetPos = offsetPos.applyMatrix4(newMideCubeMatrix.transpose());
+            // if (item.uuid == this.rotateShowUUid) {
+            //     offsetPos = new Vector3(0, 2.1, 2.1)
+            // }
+
             if (this.rotateShowUUid != "") {
                 item.visible = item.uuid == this.rotateShowUUid;
             }
@@ -352,8 +364,10 @@ export class MagicCube {
                 item.visible = true;
             }
 
-            let offsetPos: Vector3 = new Vector3(item.position.x - midCube.position.x, item.position.y - midCube.position.y, item.position.z - midCube.position.z)
-            // console.log(i, offsetPos.x, offsetPos.y, offsetPos.z);
+            if (item.visible) {
+                console.log("offsetPos: ", offsetPos.x, offsetPos.y, offsetPos.z);
+            }
+
 
             // 验证偏移是否正确
             // item.matrix.multiply(new THREE.Matrix4().makeTranslation(offsetPos.x, offsetPos.y, offsetPos.z));
@@ -375,7 +389,7 @@ export class MagicCube {
             // console.log(item.position.clone().applyMatrix4(item.matrix));
             // console.log(item.position);
         }
-        console.log('mid: ', midCube.position);
+        // console.log('mid: ', midCube.position);
 
     }
 

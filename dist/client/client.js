@@ -75,7 +75,7 @@ function createAxis() {
     scene.add(axisHelper);
 }
 function oneKeyDown(e) {
-    console.log(e.keyCode);
+    // console.log(e.keyCode);
     let isNeedRotate = false;
     switch (e.keyCode) {
         case 87:
@@ -120,7 +120,7 @@ function oneKeyDown(e) {
             break;
     }
     if (isNeedRotate) {
-        console.log(curRotateDirection);
+        // console.log(curRotateDirection)
         magicCube.rotate(curCubeDirection, curRotateDirection, 90);
     }
 }
