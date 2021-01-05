@@ -38,6 +38,7 @@ export class MagicCube {
         this.rtDirect = rotateDirection.Clockwise;
         this.targetAngle = 0;
         this.animationSpeed = 1;
+        this.rotateShowUUid = "";
         this.scene = scene;
         this.cubeArr = new Array();
         this.maxRanks = num;
@@ -69,9 +70,9 @@ export class MagicCube {
         let mats = [];
         for (var i = 0; i < geometry.faces.length; i++) {
             let boxColor = cubeColor.Black;
-            if (dirs.includes(i)) {
-                boxColor = this.getCubeColor(i);
-            }
+            // if (dirs.includes(i)) {
+            boxColor = this.getCubeColor(i);
+            // }
             let material = new THREE.MeshBasicMaterial({
                 color: boxColor, wireframe: false
             });
@@ -284,6 +285,9 @@ export class MagicCube {
             // item.matrix.multiply(new THREE.Matrix4().makeTranslation(offsetPos.x, offsetPos.y, offsetPos.z));
         }
     }
+    setRotateShowUUid(uuidStr) {
+        this.rotateShowUUid = uuidStr;
+    }
     rotateImediate(direction, rtDirect, angle) {
         let arr = this.getFaceCube(direction);
         let resultAngle = 0;
@@ -298,11 +302,18 @@ export class MagicCube {
         resultAngle = resultAngle * absAngle;
         console.log("resultAngle: ", resultAngle);
         let midCube = this.getMidCube(direction);
-        let midCube_matrix = midCube.matrix.clone();
+        let midCube_matrix = midCube.matrix;
         // console.log("++++++++++++++++++++++++++++++++++");
         for (let i = 0; i < arr.length; i++) {
             let item = arr[i];
             item.matrix = midCube_matrix.clone();
+            // item.visible = item == midCube;
+            if (this.rotateShowUUid != "") {
+                item.visible = item.uuid == this.rotateShowUUid;
+            }
+            else {
+                item.visible = true;
+            }
             let offsetPos = new Vector3(item.position.x - midCube.position.x, item.position.y - midCube.position.y, item.position.z - midCube.position.z);
             // console.log(i, offsetPos.x, offsetPos.y, offsetPos.z);
             // 验证偏移是否正确

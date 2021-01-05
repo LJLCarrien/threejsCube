@@ -11,7 +11,7 @@ let controls: OrbitControls;
 
 let magicCube: MagicCube;
 const MAGICCUBE_RANKS = 3;
-const MAGICCUBE_ROTATE_SPEED = 1;
+const MAGICCUBE_ROTATE_SPEED = 10;
 
 let curCubeDirection: cubeDirection = cubeDirection.None;
 let curRotateDirection: rotateDirection = rotateDirection.Clockwise;
@@ -175,7 +175,8 @@ $("#rotateClockwise").click(function () {
 })
 
 $("#rotateAntiClockwise").click(function () {
-    magicCube.makeMid(cubeDirection.Front, rotateDirection.AntiClockwise, 90);
+    // magicCube.makeMid(cubeDirection.Front, rotateDirection.AntiClockwise, 90);
+    magicCube.setRotateShowUUid("");
 })
 
 $("#imediateApply").click(function () {
@@ -207,6 +208,8 @@ function onDocumentMouseDown(event) {
     if (intersects.length > 0) {
         let obj = intersects[0].object;
         console.log(obj.position, obj.quaternion, obj.scale);
+        magicCube.setRotateShowUUid(obj.uuid);
+        console.log(obj.uuid);
     }
 }
 window.addEventListener('click', onDocumentMouseDown, false);

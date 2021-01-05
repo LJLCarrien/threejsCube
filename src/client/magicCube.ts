@@ -70,9 +70,9 @@ export class MagicCube {
 
         for (var i = 0; i < geometry.faces.length; i++) {
             let boxColor: string = cubeColor.Black;
-            if (dirs.includes(i)) {
-                boxColor = this.getCubeColor(i);
-            }
+            // if (dirs.includes(i)) {
+            boxColor = this.getCubeColor(i);
+            // }
 
             let material = new THREE.MeshBasicMaterial({
                 color: boxColor, wireframe: false
@@ -260,6 +260,7 @@ export class MagicCube {
     private rtDirect: rotateDirection = rotateDirection.Clockwise;
     private targetAngle: number = 0;
     private animationSpeed: number = 1;
+    private rotateShowUUid: string = "";
 
     private resetAnimateInfo() {
         this.direction = cubeDirection.None;
@@ -318,6 +319,10 @@ export class MagicCube {
         }
     }
 
+    public setRotateShowUUid(uuidStr: string) {
+        this.rotateShowUUid = uuidStr;
+    }
+
     private rotateImediate(direction: cubeDirection, rtDirect: rotateDirection, angle: number) {
         let arr: Array<THREE.Mesh> = this.getFaceCube(direction);
 
@@ -332,12 +337,20 @@ export class MagicCube {
         resultAngle = resultAngle * absAngle;
         console.log("resultAngle: ", resultAngle);
         let midCube = this.getMidCube(direction);
-        let midCube_matrix: Matrix4 = midCube.matrix.clone();
+        let midCube_matrix: Matrix4 = midCube.matrix;
         // console.log("++++++++++++++++++++++++++++++++++");
 
         for (let i = 0; i < arr.length; i++) {
             let item = arr[i];
             item.matrix = midCube_matrix.clone();
+
+            // item.visible = item == midCube;
+            if (this.rotateShowUUid != "") {
+                item.visible = item.uuid == this.rotateShowUUid;
+            }
+            else {
+                item.visible = true;
+            }
 
             let offsetPos: Vector3 = new Vector3(item.position.x - midCube.position.x, item.position.y - midCube.position.y, item.position.z - midCube.position.z)
             // console.log(i, offsetPos.x, offsetPos.y, offsetPos.z);
