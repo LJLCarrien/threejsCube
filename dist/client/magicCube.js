@@ -37,6 +37,7 @@ export class MagicCube {
         this.direction = cubeDirection.None;
         this.rtDirect = rotateDirection.Clockwise;
         this.targetAngle = 0;
+        this.animCubeOffsetDic = new Map();
         this.animationSpeed = 1;
         this.scene = scene;
         this.cubeArr = new Array();
@@ -237,6 +238,15 @@ export class MagicCube {
         // }
         return resultArr;
     }
+    getCubeOffset(cubeArr) {
+        let arr = new Array();
+        let mid = cubeArr[4];
+        for (let i = 0; i < cubeArr.length; i++) {
+            const element = cubeArr[i];
+            arr[i] = new Vector3(element.position.x - mid.position.x, element.position.y - mid.position.y, element.position.z - mid.position.z);
+        }
+        return arr;
+    }
     sortBy(names, ascendings) {
         return function (x, y) {
             for (let i = 0; i < names.length; i++) {
@@ -273,6 +283,7 @@ export class MagicCube {
             this.rtDirect = rtDirect;
             this.targetAngle = angle;
             this.animCubeArr = this.getFaceCube(direction);
+            this.animCubeOffsetDic.set(direction, this.getCubeOffset(this.animCubeArr));
         }
         else {
             if (this.isAnimating()) {
@@ -306,32 +317,6 @@ export class MagicCube {
             // item.matrix.multiply(new THREE.Matrix4().makeTranslation(offsetPos.x, offsetPos.y, offsetPos.z));
         }
     }
-    getOffset(direction, index) {
-        switch (direction) {
-            case cubeDirection.Right:
-                switch (index) {
-                    case 0:
-                        return new Vector3(0, this.cubeDiameter + this.cubeOffset, this.cubeDiameter + this.cubeOffset);
-                    case 1:
-                        return new Vector3(0, this.cubeDiameter + this.cubeOffset, 0);
-                    case 2:
-                        return new Vector3(0, this.cubeDiameter + this.cubeOffset, -1 * (this.cubeDiameter + this.cubeOffset));
-                    case 3:
-                        return new Vector3(0, 0, this.cubeDiameter + this.cubeOffset);
-                    case 5:
-                        return new Vector3(0, 0, -1 * (this.cubeDiameter + this.cubeOffset));
-                    case 6:
-                        return new Vector3(0, -1 * (this.cubeDiameter + this.cubeOffset), this.cubeDiameter + this.cubeOffset);
-                    case 7:
-                        return new Vector3(0, -1 * (this.cubeDiameter + this.cubeOffset), 0);
-                    case 8:
-                        return new Vector3(0, -1 * (this.cubeDiameter + this.cubeOffset), -1 * (this.cubeDiameter + this.cubeOffset));
-                }
-                break;
-            default:
-                return new Vector3();
-        }
-    }
     rotateImediate(arr, direction, rtDirect, angle) {
         let resultAngle = 0;
         if (direction == cubeDirection.Right || direction == cubeDirection.Up || direction == cubeDirection.Front) {
@@ -360,7 +345,12 @@ export class MagicCube {
             let item = arr[i];
             if (item == midCube)
                 continue;
-            let offsetPos = this.getOffset(direction, i); // new Vector3(item.position.x - midCube.position.x, item.position.y - midCube.position.y, item.position.z - midCube.position.z)
+            let distance = new Vector3(item.position.x - midCube.position.x, item.position.y - midCube.position.y, item.position.z - midCube.position.z);
+            let relativePosition = new Vector3();
+            relativePosition.x = distance.dot(MagicCube.mul(midCube.quaternion, new Vector3(-1, 0, 0)));
+            relativePosition.y = distance.dot(MagicCube.mul(midCube.quaternion, new Vector3(0, 1, 0)));
+            relativePosition.z = distance.dot(MagicCube.mul(midCube.quaternion, new Vector3(0, 0, -1)));
+            let offsetPos = relativePosition; //this.animCubeOffsetDic.get(direction)[i];// new Vector3(item.position.x - midCube.position.x, item.position.y - midCube.position.y, item.position.z - midCube.position.z)
             // console.log(i, offsetPos.x, offsetPos.y, offsetPos.z);
             item.matrix = midCube.matrix.clone();
             // 验证偏移是否正确
@@ -404,6 +394,25 @@ export class MagicCube {
         //     // console.log(item.position);
         // }
         // // console.log('mid: ', midCube.position);
+    }
+    static mul(rotation, point) {
+        let x = rotation.x * 2;
+        let y = rotation.y * 2;
+        let z = rotation.z * 2;
+        let xx = rotation.x * x;
+        let yy = rotation.y * y;
+        let zz = rotation.z * z;
+        let xy = rotation.x * y;
+        let xz = rotation.x * z;
+        let yz = rotation.y * z;
+        let wx = rotation.w * x;
+        let wy = rotation.w * y;
+        let wz = rotation.w * z;
+        let res = new Vector3(0, 0, 0);
+        res.x = (1 - (yy + zz)) * point.x + (xy - wz) * point.y + (xz + wy) * point.z;
+        res.y = (xy + wz) * point.x + (1 - (xx + zz)) * point.y + (yz - wx) * point.z;
+        res.z = (xz - wy) * point.x + (yz + wx) * point.y + (1 - (xx + yy)) * point.z;
+        return res;
     }
     isAnimating() {
         return this.targetAngle > 0;

@@ -1,6 +1,6 @@
 import { version } from 'typescript';
 import * as THREE from '/build/three.module.js'
-import { Matrix4, Quaternion, Texture, Vector3 } from '/build/three.module.js';
+import { AxesHelper, Matrix4, Mesh, Quaternion, Texture, Vector3 } from '/build/three.module.js';
 
 // 以下按照面的渲染顺序排序(上黄下白，前蓝后绿，左橙右红)
 export enum rotateDirection {
@@ -259,6 +259,18 @@ export class MagicCube {
         return resultArr;
     }
 
+    getCubeOffset(cubeArr: Array<Mesh>): Array<Vector3> {
+        let arr = new Array<Vector3>();
+        let mid = cubeArr[4];
+        for (let i = 0; i < cubeArr.length; i++) {
+            const element = cubeArr[i];
+            arr[i] = new Vector3(element.position.x - mid.position.x,
+                element.position.y - mid.position.y,
+                element.position.z - mid.position.z);
+        }
+        return arr;
+    }
+
     sortBy(names: Array<string>, ascendings: Array<boolean>) {
         return function (x, y) {
             for (let i = 0; i < names.length; i++) {
@@ -283,6 +295,7 @@ export class MagicCube {
     private rtDirect: rotateDirection = rotateDirection.Clockwise;
     private targetAngle: number = 0;
     private animCubeArr: Array<THREE.Mesh>;
+    private animCubeOffsetDic: Map<cubeDirection, Array<Vector3>> = new Map<cubeDirection, Array<Vector3>>();
     private animationSpeed: number = 1;
 
     private resetAnimateInfo() {
@@ -306,6 +319,7 @@ export class MagicCube {
             this.rtDirect = rtDirect;
             this.targetAngle = angle;
             this.animCubeArr = this.getFaceCube(direction);
+            this.animCubeOffsetDic.set(direction, this.getCubeOffset(this.animCubeArr));
         }
         else {
             if (this.isAnimating()) {
@@ -345,34 +359,6 @@ export class MagicCube {
         }
     }
 
-    getOffset(direction: cubeDirection, index: number): Vector3 {
-        switch (direction) {
-            case cubeDirection.Right:
-                switch (index) {
-                    case 0:
-                        return new Vector3(0, this.cubeDiameter + this.cubeOffset, this.cubeDiameter + this.cubeOffset);
-                    case 1:
-                        return new Vector3(0, this.cubeDiameter + this.cubeOffset, 0);
-                    case 2:
-                        return new Vector3(0, this.cubeDiameter + this.cubeOffset, -1 * (this.cubeDiameter + this.cubeOffset));
-                    case 3:
-                        return new Vector3(0, 0, this.cubeDiameter + this.cubeOffset);
-                    case 5:
-                        return new Vector3(0, 0, -1 * (this.cubeDiameter + this.cubeOffset));
-                    case 6:
-                        return new Vector3(0, -1 * (this.cubeDiameter + this.cubeOffset), this.cubeDiameter + this.cubeOffset);
-                    case 7:
-                        return new Vector3(0, -1 * (this.cubeDiameter + this.cubeOffset), 0);
-                    case 8:
-                        return new Vector3(0, -1 * (this.cubeDiameter + this.cubeOffset), -1 * (this.cubeDiameter + this.cubeOffset));
-                }
-                break;
-
-            default:
-                return new Vector3();
-        }
-    }
-
     private rotateImediate(arr: Array<THREE.Mesh>, direction: cubeDirection, rtDirect: rotateDirection, angle: number) {
         let resultAngle: number = 0;
         if (direction == cubeDirection.Right || direction == cubeDirection.Up || direction == cubeDirection.Front) {
@@ -405,7 +391,14 @@ export class MagicCube {
             if (item == midCube)
                 continue;
 
-            let offsetPos: Vector3 = this.getOffset(direction, i);// new Vector3(item.position.x - midCube.position.x, item.position.y - midCube.position.y, item.position.z - midCube.position.z)
+
+            let distance = new Vector3(item.position.x - midCube.position.x, item.position.y - midCube.position.y, item.position.z - midCube.position.z);
+            let relativePosition = new Vector3();
+            relativePosition.x = distance.dot(MagicCube.mul(midCube.quaternion, new Vector3(-1, 0, 0)));
+            relativePosition.y = distance.dot(MagicCube.mul(midCube.quaternion, new Vector3(0, 1, 0)));
+            relativePosition.z = distance.dot(MagicCube.mul(midCube.quaternion, new Vector3(0, 0, -1)));
+
+            let offsetPos: Vector3 = relativePosition;//this.animCubeOffsetDic.get(direction)[i];// new Vector3(item.position.x - midCube.position.x, item.position.y - midCube.position.y, item.position.z - midCube.position.z)
             // console.log(i, offsetPos.x, offsetPos.y, offsetPos.z);
 
             item.matrix = midCube.matrix.clone();
@@ -457,6 +450,27 @@ export class MagicCube {
         // }
         // // console.log('mid: ', midCube.position);
 
+    }
+
+    static mul(rotation: Quaternion, point: Vector3): Vector3 {
+        let x: number = rotation.x * 2;
+        let y: number = rotation.y * 2;
+        let z: number = rotation.z * 2;
+        let xx: number = rotation.x * x;
+        let yy: number = rotation.y * y;
+        let zz: number = rotation.z * z;
+        let xy: number = rotation.x * y;
+        let xz: number = rotation.x * z;
+        let yz: number = rotation.y * z;
+        let wx: number = rotation.w * x;
+        let wy: number = rotation.w * y;
+        let wz: number = rotation.w * z;
+
+        let res: Vector3 = new Vector3(0, 0, 0);
+        res.x = (1 - (yy + zz)) * point.x + (xy - wz) * point.y + (xz + wy) * point.z;
+        res.y = (xy + wz) * point.x + (1 - (xx + zz)) * point.y + (yz - wx) * point.z;
+        res.z = (xz - wy) * point.x + (yz + wx) * point.y + (1 - (xx + yy)) * point.z;
+        return res;
     }
 
     public isAnimating() {

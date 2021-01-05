@@ -95,46 +95,49 @@ function createAxis() {
 }
 
 function oneKeyDown(e: KeyboardEvent) {
-    console.log(e.keyCode);
+    console.log(e.key);
     let isNeedRotate = false;
-    switch (e.keyCode) {
-        case 87:
+    switch (e.key) {
+        case "w":
             console.log("Up");
             curCubeDirection = cubeDirection.Up;
             isNeedRotate = true;
             break;
-        case 83:
+        case "s":
             console.log("Down");
             curCubeDirection = cubeDirection.Down;
             isNeedRotate = true;
             break;
-        case 65:
+        case "a":
             console.log("Left");
             curCubeDirection = cubeDirection.Left;
             isNeedRotate = true;
             break;
-        case 68:
+        case "d":
             console.log("Right");
             curCubeDirection = cubeDirection.Right;
             isNeedRotate = true;
             break;
-        case 81:
+        case "q":
             console.log("Front");
             curCubeDirection = cubeDirection.Front;
             isNeedRotate = true;
             break;
-        case 69:
+        case "e":
             console.log("Back");
             curCubeDirection = cubeDirection.Back;
             isNeedRotate = true;
             break;
-        case 74:
+        case "j":
             console.log("J 切换顺时针");
             curRotateDirection = rotateDirection.Clockwise;
             break;
-        case 75:
+        case "k":
             console.log("K 切换逆时针");
             curRotateDirection = rotateDirection.AntiClockwise;
+            break;
+        case "r":
+            magicCube.updateAnimation();
             break;
         default:
             break;
@@ -164,7 +167,7 @@ function render() {
 function animate() {
     requestAnimationFrame(animate);
 
-    magicCube.updateAnimation();
+    // magicCube.updateAnimation();
     controls.update();
 
     render();
@@ -207,7 +210,7 @@ function onDocumentMouseDown(event) {
 
     if (intersects.length > 0) {
         let obj = intersects[0].object;
-        console.log(obj,obj.position, obj.quaternion, obj.scale);
+        console.log(obj, obj.position, obj.quaternion, obj.scale);
     }
 }
 window.addEventListener('click', onDocumentMouseDown, false);
