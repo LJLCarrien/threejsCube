@@ -1,6 +1,7 @@
 import * as THREE from '/build/three.module.js';
 import { OrbitControls } from '/jsm/controls/OrbitControls';
 import { cubeDirection, MagicCube, rotateDirection } from "./magicCube";
+import { roundPosition } from "./vectorHelper";
 let scene;
 let renderer;
 let camera;
@@ -169,7 +170,11 @@ function onDocumentMouseDown(event) {
     var intersects = raycaster.intersectObjects(magicCube.getCubes());
     if (intersects.length > 0) {
         let obj = intersects[0].object;
-        console.log(obj.position, obj.quaternion, obj.scale);
+        // console.log(obj.position, obj.quaternion, obj.scale);
+        var worldPos = new THREE.Vector3();
+        obj.getWorldPosition(worldPos);
+        worldPos = roundPosition(worldPos);
+        console.log('localPos:', obj.position, 'worldPos:', worldPos);
         magicCube.setRotateShowUUid(obj.uuid);
         console.log(obj.uuid);
     }

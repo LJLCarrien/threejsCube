@@ -1,5 +1,6 @@
 import * as THREE from '/build/three.module.js'
 import { Matrix4, Vector3 } from '/build/three.module.js';
+import { roundPosition } from "./vectorHelper";
 
 // 以下按照面的渲染顺序排序(上黄下白，前蓝后绿，左橙右红)
 export enum rotateDirection {
@@ -63,8 +64,10 @@ export class MagicCube {
             }
         }
     }
+
     private createCube(x: number, y: number, z: number, dirs: number[]) {
 
+        // console.log('xyz:', x, y, z);
         const geometry: THREE.BoxGeometry = new THREE.BoxGeometry(this.cubeDiameter, this.cubeDiameter, this.cubeDiameter);
         let mats = [];
 
@@ -144,56 +147,70 @@ export class MagicCube {
         return result;
     }
 
+    /**
+     * 获取物体的世界坐标，并将位置四舍五入，保留1位小数
+     * @param obj 
+     */
+    private getWorldPosition(obj: THREE.Object3D): Vector3 {
+        let worldPositon = new THREE.Vector3();
+        obj.getWorldPosition(worldPositon);
+        worldPositon = roundPosition(worldPositon);
+        return worldPositon;
+    }
+
     private getMidCube(direction: cubeDirection): THREE.Mesh {
         for (let i = 0; i < this.cubeArr.length; i++) {
             let item = this.cubeArr[i];
-            let position = item.position;
+            //local position
+            // let position = item.position;
+            //world position
+            let worldPositon = this.getWorldPosition(item);
             switch (direction) {
                 case cubeDirection.Right:
                     // x: 5.2, y: 3.1, z: 3.1
-                    if (this.isFloatSame(position.x, 2 * this.cubeDiameter + 2 * this.cubeOffset + this.cubeRadius) &&
-                        this.isFloatSame(position.y, this.cubeDiameter + this.cubeOffset + this.cubeRadius) &&
-                        this.isFloatSame(position.z, this.cubeDiameter + this.cubeOffset + this.cubeRadius)
+                    if (this.isFloatSame(worldPositon.x, 2 * this.cubeDiameter + 2 * this.cubeOffset + this.cubeRadius) &&
+                        this.isFloatSame(worldPositon.y, this.cubeDiameter + this.cubeOffset + this.cubeRadius) &&
+                        this.isFloatSame(worldPositon.z, this.cubeDiameter + this.cubeOffset + this.cubeRadius)
                     )
                         return item;
                     break;
                 case cubeDirection.Left:
                     // x: 1, y: 3.1, z: 3.1
-                    if (this.isFloatSame(position.x, this.cubeRadius) &&
-                        this.isFloatSame(position.y, this.cubeDiameter + this.cubeOffset + this.cubeRadius) &&
-                        this.isFloatSame(position.z, this.cubeDiameter + this.cubeOffset + this.cubeRadius)
+                    if (this.isFloatSame(worldPositon.x, this.cubeRadius) &&
+                        this.isFloatSame(worldPositon.y, this.cubeDiameter + this.cubeOffset + this.cubeRadius) &&
+                        this.isFloatSame(worldPositon.z, this.cubeDiameter + this.cubeOffset + this.cubeRadius)
                     )
                         return item;
                     break;
                 case cubeDirection.Up:
                     // x: 3.1, y: 5.2, z: 3.1,
-                    if (this.isFloatSame(position.x, this.cubeDiameter + this.cubeOffset + this.cubeRadius) &&
-                        this.isFloatSame(position.y, 2 * this.cubeDiameter + 2 * this.cubeOffset + this.cubeRadius) &&
-                        this.isFloatSame(position.z, this.cubeDiameter + this.cubeOffset + this.cubeRadius)
+                    if (this.isFloatSame(worldPositon.x, this.cubeDiameter + this.cubeOffset + this.cubeRadius) &&
+                        this.isFloatSame(worldPositon.y, 2 * this.cubeDiameter + 2 * this.cubeOffset + this.cubeRadius) &&
+                        this.isFloatSame(worldPositon.z, this.cubeDiameter + this.cubeOffset + this.cubeRadius)
                     )
                         return item;
                     break;
                 case cubeDirection.Down:
                     // x: 3.1, y: 1, z: 3.1
-                    if (this.isFloatSame(position.x, this.cubeDiameter + this.cubeOffset + this.cubeRadius) &&
-                        this.isFloatSame(position.y, this.cubeRadius) &&
-                        this.isFloatSame(position.z, this.cubeDiameter + this.cubeOffset + this.cubeRadius)
+                    if (this.isFloatSame(worldPositon.x, this.cubeDiameter + this.cubeOffset + this.cubeRadius) &&
+                        this.isFloatSame(worldPositon.y, this.cubeRadius) &&
+                        this.isFloatSame(worldPositon.z, this.cubeDiameter + this.cubeOffset + this.cubeRadius)
                     )
                         return item;
                     break;
                 case cubeDirection.Front:
                     // x: 3.1, y: 3.1, z: 5.2
-                    if (this.isFloatSame(position.x, this.cubeDiameter + this.cubeOffset + this.cubeRadius) &&
-                        this.isFloatSame(position.y, this.cubeDiameter + this.cubeOffset + this.cubeRadius) &&
-                        this.isFloatSame(position.z, 2 * this.cubeDiameter + 2 * this.cubeOffset + this.cubeRadius)
+                    if (this.isFloatSame(worldPositon.x, this.cubeDiameter + this.cubeOffset + this.cubeRadius) &&
+                        this.isFloatSame(worldPositon.y, this.cubeDiameter + this.cubeOffset + this.cubeRadius) &&
+                        this.isFloatSame(worldPositon.z, 2 * this.cubeDiameter + 2 * this.cubeOffset + this.cubeRadius)
                     )
                         return item;
                     break;
                 case cubeDirection.Back:
                     // x: 3.1, y: 3.1, z: 1
-                    if (this.isFloatSame(position.x, this.cubeDiameter + this.cubeOffset + this.cubeRadius) &&
-                        this.isFloatSame(position.y, this.cubeDiameter + this.cubeOffset + this.cubeRadius) &&
-                        this.isFloatSame(position.z, this.cubeRadius)
+                    if (this.isFloatSame(worldPositon.x, this.cubeDiameter + this.cubeOffset + this.cubeRadius) &&
+                        this.isFloatSame(worldPositon.y, this.cubeDiameter + this.cubeOffset + this.cubeRadius) &&
+                        this.isFloatSame(worldPositon.z, this.cubeRadius)
                     )
                         return item;
                     break;
@@ -203,41 +220,50 @@ export class MagicCube {
             }
         }
     }
+
     public getFaceCube(direction: cubeDirection) {
         let resultArr = new Array<THREE.Mesh>();
+        let rightSign = this.cubeRadius + (this.maxRanks - 1) * (this.cubeDiameter + this.cubeOffset);
+        let upSign = this.cubeRadius + (this.maxRanks - 1) * (this.cubeDiameter + this.cubeOffset);
+        let frontSign = this.cubeRadius + (this.maxRanks - 1) * (this.cubeDiameter + this.cubeOffset);
         for (let i = 0; i < this.cubeArr.length; i++) {
+            let item = this.cubeArr[i];
+            //local position
+            // let position = item.position;
+            //world position
+            let worldPositon = this.getWorldPosition(item);
 
-            // let position = new THREE.Vector3(0, 0, 0).applyMatrix4(this.cubeArr[i].matrix);
-            let position = this.cubeArr[i].position;
+
             switch (direction) {
                 case cubeDirection.Right:
-                    if (this.isFloatSame(position.x, this.cubeRadius + (this.maxRanks - 1) * (this.cubeDiameter + this.cubeOffset))) {
-                        resultArr.push(this.cubeArr[i]);
+                    if (this.isFloatSame(worldPositon.x, rightSign)) {
+                        resultArr.push(item);
                     }
                     break;
                 case cubeDirection.Left:
-                    if (this.isFloatSame(position.x, this.cubeRadius)) {
-                        resultArr.push(this.cubeArr[i]);
+                    if (this.isFloatSame(worldPositon.x, this.cubeRadius)) {
+                        resultArr.push(item);
                     }
                     break;
                 case cubeDirection.Up:
-                    if (this.isFloatSame(position.y, this.cubeRadius + (this.maxRanks - 1) * (this.cubeDiameter + this.cubeOffset))) {
-                        resultArr.push(this.cubeArr[i]);
+                    if (this.isFloatSame(worldPositon.y, upSign)) {
+                        resultArr.push(item);
                     }
                     break;
                 case cubeDirection.Down:
-                    if (this.isFloatSame(position.y, this.cubeRadius)) {
-                        resultArr.push(this.cubeArr[i]);
+                    if (this.isFloatSame(worldPositon.y, this.cubeRadius)) {
+                        resultArr.push(item);
                     }
                     break;
                 case cubeDirection.Front:
-                    if (this.isFloatSame(position.z, this.cubeRadius + (this.maxRanks - 1) * (this.cubeDiameter + this.cubeOffset))) {
-                        resultArr.push(this.cubeArr[i]);
+                    if (this.isFloatSame(worldPositon.z, frontSign)) {
+                        // item.visible=false;
+                        resultArr.push(item);
                     }
                     break;
                 case cubeDirection.Back:
-                    if (this.isFloatSame(position.z, this.cubeRadius)) {
-                        resultArr.push(this.cubeArr[i]);
+                    if (this.isFloatSame(worldPositon.z, this.cubeRadius)) {
+                        resultArr.push(item);
                     }
                     break;
                 default:
@@ -302,7 +328,7 @@ export class MagicCube {
         angle = angle * Math.PI / 180;
         let absAngle = Math.abs(angle);
         resultAngle = resultAngle * absAngle;
-        console.log("resultAngle: ", resultAngle);
+        // console.log("resultAngle: ", resultAngle);
         let midCube = arr[4];
         let midCube_matrix: Matrix4 = midCube.matrix.clone();
 
@@ -340,34 +366,20 @@ export class MagicCube {
         let midCube_matrix: Matrix4 = midCube.matrix;
         // console.log("++++++++++++++++++++++++++++++++++");
 
-        let xAxis: Vector3 = new Vector3();
-        let yAxis: Vector3 = new Vector3();
-        let zAxis: Vector3 = new Vector3();
-        midCube_matrix.extractBasis(xAxis, yAxis, zAxis);
-        let newMideCubeMatrix = new Matrix4().makeBasis(xAxis.normalize(), yAxis.normalize(), zAxis.normalize());
-        console.log('new xyz: ', xAxis.normalize(), yAxis.normalize(), zAxis.normalize());
-
         for (let i = 0; i < arr.length; i++) {
             let item = arr[i];
             item.matrix = midCube_matrix.clone();
 
-            let offsetPos: Vector3 = new Vector3(item.position.x - midCube.position.x, item.position.y - midCube.position.y, item.position.z - midCube.position.z)
-            offsetPos = offsetPos.applyMatrix4(newMideCubeMatrix.transpose());
-            // if (item.uuid == this.rotateShowUUid) {
-            //     offsetPos = new Vector3(0, 2.1, 2.1)
+            // // item.visible = item == midCube;
+            // if (this.rotateShowUUid != "") {
+            //     item.visible = item.uuid == this.rotateShowUUid;
+            // }
+            // else {
+            //     item.visible = true;
             // }
 
-            if (this.rotateShowUUid != "") {
-                item.visible = item.uuid == this.rotateShowUUid;
-            }
-            else {
-                item.visible = true;
-            }
-
-            if (item.visible) {
-                console.log("offsetPos: ", offsetPos.x, offsetPos.y, offsetPos.z);
-            }
-
+            let offsetPos: Vector3 = new Vector3(item.position.x - midCube.position.x, item.position.y - midCube.position.y, item.position.z - midCube.position.z)
+            // console.log(i, offsetPos.x, offsetPos.y, offsetPos.z);
 
             // 验证偏移是否正确
             // item.matrix.multiply(new THREE.Matrix4().makeTranslation(offsetPos.x, offsetPos.y, offsetPos.z));
@@ -387,11 +399,14 @@ export class MagicCube {
             }
             // item.matrix.decompose(item.position, item.quaternion, item.scale);
             // console.log(item.position.clone().applyMatrix4(item.matrix));
-            // console.log(item.position);
+            // console.log('pos:',item.position);
+
         }
         // console.log('mid: ', midCube.position);
 
     }
+
+
 
     public isAnimating() {
         return this.targetAngle > 0;
@@ -410,11 +425,6 @@ export class MagicCube {
 
             if (this.targetAngle == 0) {
                 this.resetAnimateInfo();
-
-                for (let i = 0; i < this.cubeArr.length; i++) {
-                    let item = this.cubeArr[i];
-                    item.matrix.decompose(item.position, item.quaternion, item.scale);
-                }
             }
         }
     }
