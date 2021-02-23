@@ -368,9 +368,14 @@ export class MagicCube {
 
         for (let i = 0; i < arr.length; i++) {
             let item = arr[i];
-            item.matrix = midCube_matrix.clone();
 
-            // // item.visible = item == midCube;
+            let itemWorldPositon = this.getWorldPosition(item);
+            let midWorldPositon = this.getWorldPosition(midCube);
+
+            let offsetPos: Vector3 = new Vector3(itemWorldPositon.x - midWorldPositon.x, itemWorldPositon.y - midWorldPositon.y, itemWorldPositon.z - midWorldPositon.z)
+            // console.log(i, offsetPos.x, offsetPos.y, offsetPos.z);
+
+            // item.visible = item == midCube;
             // if (this.rotateShowUUid != "") {
             //     item.visible = item.uuid == this.rotateShowUUid;
             // }
@@ -378,13 +383,12 @@ export class MagicCube {
             //     item.visible = true;
             // }
 
-            let offsetPos: Vector3 = new Vector3(item.position.x - midCube.position.x, item.position.y - midCube.position.y, item.position.z - midCube.position.z)
-            // console.log(i, offsetPos.x, offsetPos.y, offsetPos.z);
-
             // 验证偏移是否正确
             // item.matrix.multiply(new THREE.Matrix4().makeTranslation(offsetPos.x, offsetPos.y, offsetPos.z));
 
-            // 把所有方块移动到中心，先旋转，再平移
+            // 把所有方块移动到中心，先旋转，再平移 
+            item.matrix = midCube_matrix.clone();
+
             if (direction == cubeDirection.Left || direction == cubeDirection.Right) {
                 item.matrix.multiply(new THREE.Matrix4().makeRotationX(resultAngle));
                 item.matrix.multiply(new THREE.Matrix4().makeTranslation(offsetPos.x, offsetPos.y, offsetPos.z));
