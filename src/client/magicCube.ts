@@ -378,9 +378,6 @@ export class MagicCube {
                 item.visible = true;
             }
 
-            // 验证偏移是否正确
-            // item.matrix.multiply(new THREE.Matrix4().makeTranslation(offsetPos.x, offsetPos.y, offsetPos.z));
-
             // 把所有方块移动到中心，先旋转，再平移 
             item.matrix = midCube_matrix.clone();
 
