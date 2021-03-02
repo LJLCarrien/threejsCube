@@ -8,7 +8,7 @@ let camera;
 let controls;
 let magicCube;
 const MAGICCUBE_RANKS = 3;
-const MAGICCUBE_ROTATE_SPEED = 10;
+const MAGICCUBE_ROTATE_SPEED = 1;
 let curCubeDirection = cubeDirection.None;
 let curRotateDirection = rotateDirection.Clockwise;
 initBase();
@@ -121,7 +121,6 @@ function oneKeyDown(e) {
             break;
     }
     if (isNeedRotate) {
-        magicCube.setRelativePos(curCubeDirection);
         // console.log(curRotateDirection)
         magicCube.rotate(curCubeDirection, curRotateDirection, 90);
     }

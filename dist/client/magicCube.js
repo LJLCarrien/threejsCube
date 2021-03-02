@@ -274,6 +274,7 @@ export class MagicCube {
                 console.log("动画过程中不允许旋转");
                 return;
             }
+            this.setRelativePos(direction);
             this.direction = direction;
             this.rtDirect = rtDirect;
             this.targetAngle = angle;
@@ -322,7 +323,7 @@ export class MagicCube {
             let itemWorldPos = this.getWorldPosition(item);
             let relativePos = new Vector3(itemWorldPos.x - mideCubeWorldPos.x, itemWorldPos.y - mideCubeWorldPos.y, itemWorldPos.z - mideCubeWorldPos.z);
             this.dic[item.uuid] = relativePos;
-            console.log(item.uuid, relativePos);
+            // console.log(item.uuid, relativePos)
         }
     }
     getRelativePos(uuid) {
