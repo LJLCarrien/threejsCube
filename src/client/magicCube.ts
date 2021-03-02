@@ -320,35 +320,6 @@ export class MagicCube {
         }
     }
 
-    public makeMid(direction: cubeDirection, rtDirect: rotateDirection, angle: number) {
-        let arr: Array<THREE.Mesh> = this.getFaceCube(direction);
-
-        let resultAngle: number = 0;
-        if (direction == cubeDirection.Right || direction == cubeDirection.Up || direction == cubeDirection.Front) {
-            resultAngle = rtDirect == rotateDirection.Clockwise ? -1 : 1;
-        } else if (direction == cubeDirection.Left || direction == cubeDirection.Down || direction == cubeDirection.Back) {
-            resultAngle = rtDirect == rotateDirection.Clockwise ? 1 : -1;
-        }
-        angle = angle * Math.PI / 180;
-        let absAngle = Math.abs(angle);
-        resultAngle = resultAngle * absAngle;
-        // console.log("resultAngle: ", resultAngle);
-        let midCube = arr[4];
-        let midCube_matrix: Matrix4 = midCube.matrix.clone();
-
-        for (let i = 0; i < arr.length; i++) {
-            let item = arr[i];
-            item.matrix = midCube_matrix.clone();
-
-            // let offsetPos: Vector3 = new Vector3(item.position.x - midCube.position.x, item.position.y - midCube.position.y, item.position.z - midCube.position.z)
-            // console.log(i, offsetPos.x, offsetPos.y, offsetPos.z);
-
-            // 验证偏移是否正确
-            // item.matrix.multiply(new THREE.Matrix4().makeTranslation(offsetPos.x, offsetPos.y, offsetPos.z));
-
-        }
-    }
-
     public setRotateShowUUid(uuidStr: string) {
         this.rotateShowUUid = uuidStr;
     }

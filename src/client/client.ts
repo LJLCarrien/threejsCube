@@ -191,7 +191,6 @@ $("#rotateClockwise").click(function () {
 })
 
 $("#rotateAntiClockwise").click(function () {
-    // magicCube.makeMid(cubeDirection.Front, rotateDirection.AntiClockwise, 90);
     magicCube.setRotateShowUUid("");
 })
 
