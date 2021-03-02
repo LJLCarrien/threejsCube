@@ -40,6 +40,7 @@ export class MagicCube {
         this.targetAngle = 0;
         this.animationSpeed = 1;
         this.rotateShowUUid = "";
+        this.dic = {};
         this.scene = scene;
         this.cubeArr = new Array();
         this.maxRanks = num;
@@ -76,7 +77,8 @@ export class MagicCube {
                 boxColor = this.getCubeColor(i);
             }
             let material = new THREE.MeshBasicMaterial({
-                color: boxColor, wireframe: false
+                color: boxColor, wireframe: false,
+                transparent: true, opacity: 0.4
             });
             mats.push(material);
         }
@@ -310,6 +312,25 @@ export class MagicCube {
     setRotateShowUUid(uuidStr) {
         this.rotateShowUUid = uuidStr;
     }
+    setRelativePos(direction) {
+        this.dic = {};
+        let arr = this.getFaceCube(direction);
+        let midCube = this.getMidCube(direction);
+        let mideCubeWorldPos = this.getWorldPosition(midCube);
+        for (let index = 0; index < arr.length; index++) {
+            const item = arr[index];
+            let itemWorldPos = this.getWorldPosition(item);
+            let relativePos = new Vector3(itemWorldPos.x - mideCubeWorldPos.x, itemWorldPos.y - mideCubeWorldPos.y, itemWorldPos.z - mideCubeWorldPos.z);
+            this.dic[item.uuid] = relativePos;
+            console.log(item.uuid, relativePos);
+        }
+    }
+    getRelativePos(uuid) {
+        if (this.dic[uuid] != null) {
+            return this.dic[uuid];
+        }
+        return null;
+    }
     rotateImediate(direction, rtDirect, angle) {
         let arr = this.getFaceCube(direction);
         let resultAngle = 0;
@@ -328,17 +349,14 @@ export class MagicCube {
         // console.log("++++++++++++++++++++++++++++++++++");
         for (let i = 0; i < arr.length; i++) {
             let item = arr[i];
-            let itemWorldPositon = this.getWorldPosition(item);
-            let midWorldPositon = this.getWorldPosition(midCube);
-            let offsetPos = new Vector3(itemWorldPositon.x - midWorldPositon.x, itemWorldPositon.y - midWorldPositon.y, itemWorldPositon.z - midWorldPositon.z);
-            // console.log(i, offsetPos.x, offsetPos.y, offsetPos.z);
+            let offsetPos = this.getRelativePos(item.uuid);
             // item.visible = item == midCube;
-            // if (this.rotateShowUUid != "") {
-            //     item.visible = item.uuid == this.rotateShowUUid;
-            // }
-            // else {
-            //     item.visible = true;
-            // }
+            if (this.rotateShowUUid != "") {
+                item.visible = item.uuid == this.rotateShowUUid;
+            }
+            else {
+                item.visible = true;
+            }
             // 验证偏移是否正确
             // item.matrix.multiply(new THREE.Matrix4().makeTranslation(offsetPos.x, offsetPos.y, offsetPos.z));
             // 把所有方块移动到中心，先旋转，再平移 

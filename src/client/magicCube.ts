@@ -78,7 +78,8 @@ export class MagicCube {
             }
 
             let material = new THREE.MeshBasicMaterial({
-                color: boxColor, wireframe: false
+                color: boxColor, wireframe: false,
+                transparent: true, opacity: 0.4
             });
             mats.push(material);
         }
@@ -278,6 +279,8 @@ export class MagicCube {
         return resultArr;
     }
 
+
+
     public getCubes() {
         return this.cubeArr;
     }
@@ -349,6 +352,30 @@ export class MagicCube {
         this.rotateShowUUid = uuidStr;
     }
 
+    private dic: { [key: string]: Vector3; } = {};
+
+
+    public setRelativePos(direction: cubeDirection) {
+        this.dic = {};
+        let arr: Array<THREE.Mesh> = this.getFaceCube(direction);
+        let midCube = this.getMidCube(direction);
+        let mideCubeWorldPos = this.getWorldPosition(midCube);
+        for (let index = 0; index < arr.length; index++) {
+            const item = arr[index];
+            let itemWorldPos = this.getWorldPosition(item);
+            let relativePos: Vector3 = new Vector3(itemWorldPos.x - mideCubeWorldPos.x, itemWorldPos.y - mideCubeWorldPos.y, itemWorldPos.z - mideCubeWorldPos.z);
+            this.dic[item.uuid] = relativePos;
+            console.log(item.uuid, relativePos)
+        }
+    }
+
+    private getRelativePos(uuid: string): Vector3 {
+        if (this.dic[uuid] != null) {
+            return this.dic[uuid];
+        }
+        return null;
+    }
+
     private rotateImediate(direction: cubeDirection, rtDirect: rotateDirection, angle: number) {
         let arr: Array<THREE.Mesh> = this.getFaceCube(direction);
 
@@ -369,19 +396,15 @@ export class MagicCube {
         for (let i = 0; i < arr.length; i++) {
             let item = arr[i];
 
-            let itemWorldPositon = this.getWorldPosition(item);
-            let midWorldPositon = this.getWorldPosition(midCube);
-
-            let offsetPos: Vector3 = new Vector3(itemWorldPositon.x - midWorldPositon.x, itemWorldPositon.y - midWorldPositon.y, itemWorldPositon.z - midWorldPositon.z)
-            // console.log(i, offsetPos.x, offsetPos.y, offsetPos.z);
+            let offsetPos: Vector3 = this.getRelativePos(item.uuid);
 
             // item.visible = item == midCube;
-            // if (this.rotateShowUUid != "") {
-            //     item.visible = item.uuid == this.rotateShowUUid;
-            // }
-            // else {
-            //     item.visible = true;
-            // }
+            if (this.rotateShowUUid != "") {
+                item.visible = item.uuid == this.rotateShowUUid;
+            }
+            else {
+                item.visible = true;
+            }
 
             // 验证偏移是否正确
             // item.matrix.multiply(new THREE.Matrix4().makeTranslation(offsetPos.x, offsetPos.y, offsetPos.z));

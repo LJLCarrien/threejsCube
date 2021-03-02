@@ -140,6 +140,7 @@ function oneKeyDown(e: KeyboardEvent) {
     }
 
     if (isNeedRotate) {
+        magicCube.setRelativePos(curCubeDirection);
         // console.log(curRotateDirection)
         magicCube.rotate(curCubeDirection, curRotateDirection, 90);
     }
@@ -155,6 +156,15 @@ function onWindowResize() {
     render();
 }
 
+// 创建一个时钟对象Clock
+var clock = new THREE.Clock();
+// 设置渲染频率为30FBS，也就是每秒调用渲染器render方法大约30次
+var FPS = 60;
+var renderT = 1 / FPS; //单位秒  间隔多长时间渲染渲染一次
+// 声明一个变量表示render()函数被多次调用累积时间
+// 如果执行一次renderer.render，timeS重新置0
+var timeS = 0;
+
 function render() {
     renderer.render(scene, camera);
 }
@@ -163,8 +173,16 @@ function render() {
 function animate() {
     requestAnimationFrame(animate);
 
-    magicCube.updateAnimation();
     controls.update();
+
+    var T = clock.getDelta();
+    timeS = timeS + T;
+    // requestAnimationFrame默认调用render函数60次，通过时间判断，降低renderer.render执行频率
+    if (timeS > renderT) {
+        // console.log(`调用.render时间间隔`, timeS * 1000 + '毫秒');
+        magicCube.updateAnimation();
+        timeS = 0;
+    }
 
     render();
 };
