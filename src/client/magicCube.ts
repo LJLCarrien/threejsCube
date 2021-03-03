@@ -301,7 +301,7 @@ export class MagicCube {
         this.rotateImediate(this.direction, this.rtDirect, this.targetAngle);
         this.resetAnimateInfo();
     }
-    public rotate(direction: cubeDirection, rtDirect: rotateDirection, angle: number, isNeedAnimation = true) {
+    public rotate(direction: cubeDirection, rtDirect: rotateDirection, angle: number, isNeedAnimation = false) {
         if (isNeedAnimation) {
             if (this.isAnimating()) {
                 console.log("动画过程中不允许旋转");
@@ -313,6 +313,7 @@ export class MagicCube {
             this.targetAngle = angle;
         }
         else {
+            this.setRelativePos(direction);
             if (this.isAnimating()) {
                 this.imediateApply();
             }
@@ -328,7 +329,7 @@ export class MagicCube {
 
 
     public setRelativePos(direction: cubeDirection) {
-        this.dic = {};
+
         let arr: Array<THREE.Mesh> = this.getFaceCube(direction);
         let midCube = this.getMidCube(direction);
         let mideCubeWorldPos = this.getWorldPosition(midCube);
@@ -336,7 +337,9 @@ export class MagicCube {
             const item = arr[index];
             let itemWorldPos = this.getWorldPosition(item);
             let relativePos: Vector3 = new Vector3(itemWorldPos.x - mideCubeWorldPos.x, itemWorldPos.y - mideCubeWorldPos.y, itemWorldPos.z - mideCubeWorldPos.z);
-            this.dic[item.uuid] = relativePos;
+            if (!(item.uuid in this.dic)) {
+                this.dic[item.uuid] = relativePos;
+            }
             // console.log(item.uuid, relativePos)
         }
     }

@@ -268,7 +268,7 @@ export class MagicCube {
         this.rotateImediate(this.direction, this.rtDirect, this.targetAngle);
         this.resetAnimateInfo();
     }
-    rotate(direction, rtDirect, angle, isNeedAnimation = true) {
+    rotate(direction, rtDirect, angle, isNeedAnimation = false) {
         if (isNeedAnimation) {
             if (this.isAnimating()) {
                 console.log("动画过程中不允许旋转");
@@ -280,41 +280,17 @@ export class MagicCube {
             this.targetAngle = angle;
         }
         else {
+            this.setRelativePos(direction);
             if (this.isAnimating()) {
                 this.imediateApply();
             }
             this.rotateImediate(direction, rtDirect, angle);
         }
     }
-    makeMid(direction, rtDirect, angle) {
-        let arr = this.getFaceCube(direction);
-        let resultAngle = 0;
-        if (direction == cubeDirection.Right || direction == cubeDirection.Up || direction == cubeDirection.Front) {
-            resultAngle = rtDirect == rotateDirection.Clockwise ? -1 : 1;
-        }
-        else if (direction == cubeDirection.Left || direction == cubeDirection.Down || direction == cubeDirection.Back) {
-            resultAngle = rtDirect == rotateDirection.Clockwise ? 1 : -1;
-        }
-        angle = angle * Math.PI / 180;
-        let absAngle = Math.abs(angle);
-        resultAngle = resultAngle * absAngle;
-        // console.log("resultAngle: ", resultAngle);
-        let midCube = arr[4];
-        let midCube_matrix = midCube.matrix.clone();
-        for (let i = 0; i < arr.length; i++) {
-            let item = arr[i];
-            item.matrix = midCube_matrix.clone();
-            // let offsetPos: Vector3 = new Vector3(item.position.x - midCube.position.x, item.position.y - midCube.position.y, item.position.z - midCube.position.z)
-            // console.log(i, offsetPos.x, offsetPos.y, offsetPos.z);
-            // 验证偏移是否正确
-            // item.matrix.multiply(new THREE.Matrix4().makeTranslation(offsetPos.x, offsetPos.y, offsetPos.z));
-        }
-    }
     setRotateShowUUid(uuidStr) {
         this.rotateShowUUid = uuidStr;
     }
     setRelativePos(direction) {
-        this.dic = {};
         let arr = this.getFaceCube(direction);
         let midCube = this.getMidCube(direction);
         let mideCubeWorldPos = this.getWorldPosition(midCube);
@@ -322,7 +298,9 @@ export class MagicCube {
             const item = arr[index];
             let itemWorldPos = this.getWorldPosition(item);
             let relativePos = new Vector3(itemWorldPos.x - mideCubeWorldPos.x, itemWorldPos.y - mideCubeWorldPos.y, itemWorldPos.z - mideCubeWorldPos.z);
-            this.dic[item.uuid] = relativePos;
+            if (!(item.uuid in this.dic)) {
+                this.dic[item.uuid] = relativePos;
+            }
             // console.log(item.uuid, relativePos)
         }
     }
@@ -358,8 +336,6 @@ export class MagicCube {
             else {
                 item.visible = true;
             }
-            // 验证偏移是否正确
-            // item.matrix.multiply(new THREE.Matrix4().makeTranslation(offsetPos.x, offsetPos.y, offsetPos.z));
             // 把所有方块移动到中心，先旋转，再平移 
             item.matrix = midCube_matrix.clone();
             if (direction == cubeDirection.Left || direction == cubeDirection.Right) {
