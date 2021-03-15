@@ -28,6 +28,17 @@ export enum cubeColor {
     Green = "#739e3b"
 }
 
+export class baseVectorObj {
+    x: Vector3;
+    y: Vector3;
+    z: Vector3;
+    constructor(x: Vector3, y: Vector3, z: Vector3) {
+        this.x = x;
+        this.y = y;
+        this.z = z;
+    }
+}
+
 export class MagicCube {
 
     private maxRanks: number = 0;
@@ -328,7 +339,16 @@ export class MagicCube {
     private dic: { [key: string]: Vector3; } = {};
 
 
-    //获取矩阵旋转
+    //判断2个物体的基坐标系是否相等
+    private isBaseVecEqual(mata: Matrix4, matb: Matrix4) {
+        let BaseA = this.getBasisVec(mata);
+        let BaseB = this.getBasisVec(matb);
+        if (BaseA.x.equals(BaseB.x) && BaseA.y.equals(BaseB.y) && BaseA.z.equals(BaseB.z)) {
+            return true;
+        }
+        return false;
+    }
+
     private getBasisVec(mat: Matrix4) {
         let vectX: Vector3 = new Vector3();
         let vectY: Vector3 = new Vector3();
@@ -338,14 +358,24 @@ export class MagicCube {
         vectY = roundPosition(vectY);
         vectZ = roundPosition(vectZ);
         // console.log('基向量:', 'x: ', vectX, 'y: ', vectY, 'z: ', vectZ);
-        return { x: vectX, y: vectY, z: vectZ };
+        return new baseVectorObj(vectX, vectY, vectZ);
+    }
+
+
+    private vectorChangBasic(needChangeVec: Vector3, baseVec: baseVectorObj) {
+        // 世界空间的相对位置，转成基于中间方块坐标系下的相对位置
+        let newVec: Vector3 = new Vector3();
+        newVec.x = needChangeVec.dot(baseVec.x);
+        newVec.y = needChangeVec.dot(baseVec.y);
+        newVec.z = needChangeVec.dot(baseVec.z);
+        return newVec;
     }
 
     public setRelativePos(direction: cubeDirection) {
 
         let arr: Array<THREE.Mesh> = this.getFaceCube(direction);
         let midCube = this.getMidCube(direction);
-        let mideBaseVec = this.getBasisVec(midCube.matrix);
+        let mideBaseVec: baseVectorObj = this.getBasisVec(midCube.matrix);
         let mideCubeWorldPos = this.getWorldPosition(midCube);
         for (let index = 0; index < arr.length; index++) {
             const item = arr[index];
@@ -353,10 +383,12 @@ export class MagicCube {
             let relativePos: Vector3 = new Vector3(itemWorldPos.x - mideCubeWorldPos.x, itemWorldPos.y - mideCubeWorldPos.y, itemWorldPos.z - mideCubeWorldPos.z);
 
             // 世界空间的相对位置，转成基于中间方块坐标系下的相对位置
-            let baseRelativePos: Vector3 = new Vector3();
-            baseRelativePos.x = relativePos.dot(mideBaseVec.x);
-            baseRelativePos.y = relativePos.dot(mideBaseVec.y);
-            baseRelativePos.z = relativePos.dot(mideBaseVec.z);
+            // let baseRelativePos: Vector3 = new Vector3();
+            // baseRelativePos.x = relativePos.dot(mideBaseVec.x);
+            // baseRelativePos.y = relativePos.dot(mideBaseVec.y);
+            // baseRelativePos.z = relativePos.dot(mideBaseVec.z);
+
+            let baseRelativePos = this.vectorChangBasic(relativePos, mideBaseVec);
 
             this.dic[item.uuid] = baseRelativePos;
             // console.log('baseRelativePos: ', baseRelativePos);
@@ -394,27 +426,57 @@ export class MagicCube {
 
             // item.visible = item == midCube;
             if (this.rotateShowUUid != "") {
-                item.visible = item.uuid == this.rotateShowUUid || item == midCube;
+                // || item == midCube
+                item.visible = item.uuid == this.rotateShowUUid;
             }
             else {
                 item.visible = true;
             }
 
-            // 把所有方块移动到中心，先旋转，再平移 
-            item.matrix = midCube_matrix.clone();
+            if (this.isBaseVecEqual(item.matrix, midCube_matrix)) {
+                // 基坐标一致，移动方块=把方块等于中心方块-旋转-平移 
+                item.matrix = midCube_matrix.clone();
+                if (direction == cubeDirection.Left || direction == cubeDirection.Right) {
+                    item.matrix.multiply(new THREE.Matrix4().makeRotationX(resultAngle));
+                    item.matrix.multiply(new THREE.Matrix4().makeTranslation(offsetPos.x, offsetPos.y, offsetPos.z));
+                }
+                else if (direction == cubeDirection.Up || direction == cubeDirection.Down) {
+                    item.matrix.multiply(new THREE.Matrix4().makeRotationY(resultAngle));
+                    item.matrix.multiply(new THREE.Matrix4().makeTranslation(offsetPos.x, offsetPos.y, offsetPos.z))
+                }
+                else if (direction == cubeDirection.Front || direction == cubeDirection.Back) {
+                    item.matrix.multiply(new THREE.Matrix4().makeRotationZ(resultAngle));
+                    item.matrix.multiply(new THREE.Matrix4().makeTranslation(offsetPos.x, offsetPos.y, offsetPos.z))
+                }
+            }
+            else {
+                //基坐标不一致，移动方块
+                let itemBaseVec: baseVectorObj = this.getBasisVec(item.matrix);
 
-            if (direction == cubeDirection.Left || direction == cubeDirection.Right) {
-                item.matrix.multiply(new THREE.Matrix4().makeRotationX(resultAngle));
-                item.matrix.multiply(new THREE.Matrix4().makeTranslation(offsetPos.x, offsetPos.y, offsetPos.z));
+                let mideCubeWorldPos = this.getWorldPosition(midCube);
+                let itemWorldPos = this.getWorldPosition(item);
+                let offset: Vector3 = new Vector3(mideCubeWorldPos.x - itemWorldPos.x, mideCubeWorldPos.y - itemWorldPos.y, mideCubeWorldPos.z - itemWorldPos.z);
+               
+                if (item.visible) {
+                    //世界坐标系的偏移转换到局部坐标系的偏移
+                    let offset2Base = this.vectorChangBasic(offset, itemBaseVec);
+                    // 在局部坐标系下，平移
+                    item.matrix.multiply(new Matrix4().makeTranslation(offset2Base.x, offset2Base.y, offset2Base.z));
+
+                    console.log('offset: ', offset);
+                    console.log('offset2Base: ', offset2Base);
+                }
+                let angle = 1 * Math.PI / 180;
+                let absAngle = Math.abs(angle);
+                item.matrix.multiply(new THREE.Matrix4().makeRotationY(absAngle));
+                //todo: 在已有旋转的情况下，旋转还是基于自身坐标系的。要怎样才能将基于世界坐标系的旋转方向转为基于自身坐标系的的旋转方向？
+               
+                // item.matrix.multiply(translationMat);
+                // console.log('result2Base: ',result2Base);
+                // item.position.set(result.x, result.y, result.z);
             }
-            else if (direction == cubeDirection.Up || direction == cubeDirection.Down) {
-                item.matrix.multiply(new THREE.Matrix4().makeRotationY(resultAngle));
-                item.matrix.multiply(new THREE.Matrix4().makeTranslation(offsetPos.x, offsetPos.y, offsetPos.z))
-            }
-            else if (direction == cubeDirection.Front || direction == cubeDirection.Back) {
-                item.matrix.multiply(new THREE.Matrix4().makeRotationZ(resultAngle));
-                item.matrix.multiply(new THREE.Matrix4().makeTranslation(offsetPos.x, offsetPos.y, offsetPos.z))
-            }
+
+
             // item.matrix.decompose(item.position, item.quaternion, item.scale);
             // console.log(item.position.clone().applyMatrix4(item.matrix));
             // console.log('pos:',item.position);

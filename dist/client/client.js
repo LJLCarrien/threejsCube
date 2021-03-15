@@ -8,7 +8,7 @@ let camera;
 let controls;
 let magicCube;
 const MAGICCUBE_RANKS = 3;
-const MAGICCUBE_ROTATE_SPEED = 1;
+const MAGICCUBE_ROTATE_SPEED = 10;
 let curCubeDirection = cubeDirection.None;
 let curRotateDirection = rotateDirection.Clockwise;
 initBase();

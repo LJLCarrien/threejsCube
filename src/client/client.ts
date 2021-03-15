@@ -10,7 +10,7 @@ let controls: OrbitControls;
 
 let magicCube: MagicCube;
 const MAGICCUBE_RANKS = 3;
-const MAGICCUBE_ROTATE_SPEED = 1;
+const MAGICCUBE_ROTATE_SPEED = 10;
 
 let curCubeDirection: cubeDirection = cubeDirection.None;
 let curRotateDirection: rotateDirection = rotateDirection.Clockwise;
