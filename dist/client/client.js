@@ -163,7 +163,6 @@ $("#rotateClockwise").click(function () {
     magicCube.rotate(cubeDirection.Up, rotateDirection.Clockwise, 90);
 });
 $("#rotateAntiClockwise").click(function () {
-    // magicCube.makeMid(cubeDirection.Front, rotateDirection.AntiClockwise, 90);
     magicCube.setRotateShowUUid("");
 });
 $("#imediateApply").click(function () {

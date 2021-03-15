@@ -301,7 +301,7 @@ export class MagicCube {
         this.rotateImediate(this.direction, this.rtDirect, this.targetAngle);
         this.resetAnimateInfo();
     }
-    public rotate(direction: cubeDirection, rtDirect: rotateDirection, angle: number, isNeedAnimation = false) {
+    public rotate(direction: cubeDirection, rtDirect: rotateDirection, angle: number, isNeedAnimation = true) {
         if (isNeedAnimation) {
             if (this.isAnimating()) {
                 console.log("动画过程中不允许旋转");
@@ -328,19 +328,38 @@ export class MagicCube {
     private dic: { [key: string]: Vector3; } = {};
 
 
+    //获取矩阵旋转
+    private getBasisVec(mat: Matrix4) {
+        let vectX: Vector3 = new Vector3();
+        let vectY: Vector3 = new Vector3();
+        let vectZ: Vector3 = new Vector3();
+        mat.extractBasis(vectX, vectY, vectZ);
+        vectX = roundPosition(vectX);
+        vectY = roundPosition(vectY);
+        vectZ = roundPosition(vectZ);
+        // console.log('基向量:', 'x: ', vectX, 'y: ', vectY, 'z: ', vectZ);
+        return { x: vectX, y: vectY, z: vectZ };
+    }
+
     public setRelativePos(direction: cubeDirection) {
 
         let arr: Array<THREE.Mesh> = this.getFaceCube(direction);
         let midCube = this.getMidCube(direction);
+        let mideBaseVec = this.getBasisVec(midCube.matrix);
         let mideCubeWorldPos = this.getWorldPosition(midCube);
         for (let index = 0; index < arr.length; index++) {
             const item = arr[index];
             let itemWorldPos = this.getWorldPosition(item);
             let relativePos: Vector3 = new Vector3(itemWorldPos.x - mideCubeWorldPos.x, itemWorldPos.y - mideCubeWorldPos.y, itemWorldPos.z - mideCubeWorldPos.z);
-            if (!(item.uuid in this.dic)) {
-                this.dic[item.uuid] = relativePos;
-            }
-            // console.log(item.uuid, relativePos)
+
+            // 世界空间的相对位置，转成基于中间方块坐标系下的相对位置
+            let baseRelativePos: Vector3 = new Vector3();
+            baseRelativePos.x = relativePos.dot(mideBaseVec.x);
+            baseRelativePos.y = relativePos.dot(mideBaseVec.y);
+            baseRelativePos.z = relativePos.dot(mideBaseVec.z);
+
+            this.dic[item.uuid] = baseRelativePos;
+            // console.log('baseRelativePos: ', baseRelativePos);
         }
     }
 
@@ -375,7 +394,7 @@ export class MagicCube {
 
             // item.visible = item == midCube;
             if (this.rotateShowUUid != "") {
-                item.visible = item.uuid == this.rotateShowUUid;
+                item.visible = item.uuid == this.rotateShowUUid || item == midCube;
             }
             else {
                 item.visible = true;
