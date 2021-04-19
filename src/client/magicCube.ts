@@ -52,8 +52,63 @@ export class MagicCube {
         this.cubeArr = new Array<THREE.Mesh>();
         this.maxRanks = num;
         //正方体6个面，每个面num*num
-        this.createMagicCube(num)
+        // this.createMagicCube(num)
+
+        this.createTestCube();
     }
+
+    //#region  测试代码 
+    // 结论：两个旋转结果不同，是因为最后一个平移决定的。绕自身旋转后，自身坐标系发生变化，所以平移后的位置不再是原位置，表现为绕轴旋转
+    public createTestCube() {
+        //0
+        let dirs = this.getCubeDir(0, 0, 0, 3);
+        this.createCube(0, 0, 0, dirs);
+
+        //1
+        dirs = this.getCubeDir(8, 0, 0, 3);
+        this.createCube(8, 0, 0, dirs);
+
+    }
+
+    // 世界平移-自身旋转-世界平移的逆(表现为原地旋转)
+    public worldTranslation_SelfRotate() {
+        let worldPosZero = this.getWorldPosition(this.cubeArr[0]);
+        let worldPosOne = this.getWorldPosition(this.cubeArr[1]);
+        let worldOffset = worldPosZero.sub(worldPosOne);
+        let goZeroMatrix = new Matrix4().makeTranslation(worldOffset.x, worldOffset.y, worldOffset.z);
+        this.cubeArr[1].matrix.premultiply(goZeroMatrix);
+
+        let angle = 30 * Math.PI / 180;
+        let absAngle = Math.abs(angle);
+        this.cubeArr[1].matrix.multiply(new THREE.Matrix4().makeRotationZ(absAngle));
+
+        let mat4I = new THREE.Matrix4();
+        mat4I.getInverse(goZeroMatrix);
+        this.cubeArr[1].matrix.premultiply(mat4I);
+    }
+
+    // 自身平移-自身旋转-自身平移的逆（表现为绕轴旋转）
+    public SelfTranslation_SelfRotate() {
+        let worldPosZero = this.getWorldPosition(this.cubeArr[0]);
+        let worldPosOne = this.getWorldPosition(this.cubeArr[1]);
+        let worldOffset = worldPosZero.sub(worldPosOne);
+        // 世界空间转局部空间
+        let itemBaseVec = this.getBasisVec(this.cubeArr[1].matrix);
+        let localOffset = this.vectorChangBasic(worldOffset,itemBaseVec);
+
+        let goZeroMatrix = new Matrix4().makeTranslation(localOffset.x, localOffset.y, localOffset.z);
+        this.cubeArr[1].matrix.multiply(goZeroMatrix);
+
+        let angle = 30 * Math.PI / 180;
+        let absAngle = Math.abs(angle);
+        this.cubeArr[1].matrix.multiply(new THREE.Matrix4().makeRotationZ(absAngle));
+
+
+        let mat4I = new THREE.Matrix4();
+        mat4I.getInverse(goZeroMatrix);
+        this.cubeArr[1].matrix.multiply(mat4I);
+    }
+    //#endregion
 
     /**
      * nxnxn的立方体
@@ -458,16 +513,21 @@ export class MagicCube {
                 let itemWorldPos = this.getWorldPosition(item);
                 let offset: Vector3 = new Vector3(mideCubeWorldPos.x - itemWorldPos.x, mideCubeWorldPos.y - itemWorldPos.y, mideCubeWorldPos.z - itemWorldPos.z);
 
-                // if (item.visible) {
-                //世界坐标系的偏移转换到局部坐标系的偏移
-                let offset2Base = this.vectorChangBasic(offset, itemBaseVec);
-                // 在局部坐标系下，平移到中间
-                let translate2Mid = new Matrix4().makeTranslation(offset2Base.x, offset2Base.y, offset2Base.z);
-                item.matrix.multiply(translate2Mid);
+                let translate2Mid = new Matrix4();
+                if (item.visible) {
+                    //世界坐标系的偏移转换到局部坐标系的偏移
+                    // let offset2Base = this.vectorChangBasic(offset, itemBaseVec);
+                    // // 在局部坐标系下，平移到中间
+                    // translate2Mid = new Matrix4().makeTranslation(offset2Base.x, offset2Base.y, offset2Base.z);
+                    // item.matrix.multiply(translate2Mid);
 
-                // console.log('offset: ', offset);
-                // console.log('offset2Base: ', offset2Base);
-                // }
+                    // console.log('offset: ', offset);
+                    // console.log('offset2Base: ', offset2Base);
+
+                    //使用世界坐标系平移
+                    translate2Mid = new Matrix4().makeTranslation(offset.x, offset.y, offset.z);
+                    item.matrix.premultiply(translate2Mid);
+                }
 
                 // let angle = 1 * Math.PI / 180;
                 // let absAngle = Math.abs(angle);
@@ -477,7 +537,7 @@ export class MagicCube {
 
                 let worldBaseVec = new baseVectorObj(new Vector3(1, 0, 0), new Vector3(0, 1, 0), new Vector3(0, 0, 1))
 
-                if (direction == cubeDirection.Front || direction == cubeDirection.Back) {
+                if (true && direction == cubeDirection.Front || direction == cubeDirection.Back) {
 
                     let yDotZ = itemBaseVec.y.dot(worldBaseVec.z);
                     let isYZSameLine = Math.abs(yDotZ) == 1;//不管同向还是反向，是否共线
@@ -494,10 +554,15 @@ export class MagicCube {
                         console.log('x,same z');
                         // item.matrix.multiply(new THREE.Matrix4().makeRotationX(resultAngle));
                     }
-                    console.log('offsetPos', offsetPos);
+                    // console.log('offsetPos', offsetPos);
+                    // var mat4I = new THREE.Matrix4();
+                    // mat4I.getInverse(translate2Mid);
+                    // item.matrix.multiply(mat4I);
+
+                    //世界坐标系逆
                     var mat4I = new THREE.Matrix4();
                     mat4I.getInverse(translate2Mid);
-                    item.matrix.multiply(mat4I);
+                    item.matrix.premultiply(mat4I);
                 }
 
             }

@@ -187,23 +187,15 @@ function animate() {
 };
 
 $("#rotateClockwise").click(function () {
-    magicCube.rotate(cubeDirection.Up, rotateDirection.Clockwise, 90);
+    magicCube.worldTranslation_SelfRotate();
 })
 
 $("#rotateAntiClockwise").click(function () {
-    magicCube.setRotateShowUUid("");
+    magicCube.SelfTranslation_SelfRotate();
 })
 
 $("#imediateApply").click(function () {
     magicCube.imediateApply();
-})
-
-$("#rotateClockwiseNoAmimate").click(function () {
-    magicCube.rotate(cubeDirection.Up, rotateDirection.Clockwise, 90, false);
-})
-
-$("#rotateAntiClockwiseNoAmimate").click(function () {
-    magicCube.rotate(cubeDirection.Up, rotateDirection.AntiClockwise, 90, false);
 })
 
 
