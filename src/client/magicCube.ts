@@ -514,17 +514,23 @@ export class MagicCube {
                         let yDotZ = itemBaseVec.y.dot(worldBaseVec.z);
                         let isYZSameLine = Math.abs(yDotZ) == 1;//不管同向还是反向，是否共线
 
-                        if (this.isVectSameDirection(itemBaseVec.z, worldBaseVec.z)) {
+                        let zDotZ = itemBaseVec.z.dot(worldBaseVec.z);
+                        let isZZSameLine = Math.abs(zDotZ) == 1;//不管同向还是反向，是否共线
+
+                        let xDotZ = itemBaseVec.x.dot(worldBaseVec.z);
+                        let isXZSameLine = Math.abs(xDotZ) == 1;//不管同向还是反向，是否共线
+
+                        if (isZZSameLine) {
                             // console.log('z,same z');
-                            // item.matrix.multiply(new THREE.Matrix4().makeRotationZ(resultAngle));
+                            item.matrix.multiply(new THREE.Matrix4().makeRotationZ(zDotZ * resultAngle));
                         }
                         else if (isYZSameLine) {
                             // console.log('y,same z');
                             item.matrix.multiply(new THREE.Matrix4().makeRotationY(yDotZ * resultAngle));
                         }
-                        else if (this.isVectSameDirection(itemBaseVec.x, worldBaseVec.z)) {
+                        else if (isXZSameLine) {
                             // console.log('x,same z');
-                            // item.matrix.multiply(new THREE.Matrix4().makeRotationX(resultAngle));
+                            item.matrix.multiply(new THREE.Matrix4().makeRotationX(xDotZ * resultAngle));
                         }
                         // console.log('offsetPos', offsetPos);
                         var mat4I = new THREE.Matrix4();
@@ -535,8 +541,21 @@ export class MagicCube {
                         console.log('left/right');
                         let yDotX = itemBaseVec.y.dot(worldBaseVec.x);
                         let isYXSameLine = Math.abs(yDotX) == 1;//不管同向还是反向，是否共线
+
+                        let zDotX = itemBaseVec.z.dot(worldBaseVec.x);
+                        let isZXSameLine = Math.abs(zDotX) == 1;//不管同向还是反向，是否共线
+
+                        let xDotX = itemBaseVec.x.dot(worldBaseVec.x);
+                        let isXXSameLine = Math.abs(xDotX) == 1;//不管同向还是反向，是否共线
+
                         if (isYXSameLine) {
                             item.matrix.multiply(new THREE.Matrix4().makeRotationY(yDotX * resultAngle));
+                        }
+                        else if (isZXSameLine) {
+                            item.matrix.multiply(new THREE.Matrix4().makeRotationZ(zDotX * resultAngle));
+                        }
+                        else if (isXXSameLine) {
+                            item.matrix.multiply(new THREE.Matrix4().makeRotationX(xDotX * resultAngle));
                         }
                         var mat4I = new THREE.Matrix4();
                         mat4I.copy(translate2Mid).invert();// mat4I.getInverse(translate2Mid);
