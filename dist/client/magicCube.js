@@ -36,21 +36,30 @@ export class baseVectorObj {
         this.z = z;
     }
 }
+export class smallCube {
+    constructor(m, mid) {
+        this.mesh = m;
+        this.isMid = mid;
+    }
+}
 export class MagicCube {
     constructor(scene, num) {
         this.maxRanks = 0;
         this.cubeOffset = 0.1;
         this.cubeRadius = 1;
         this.cubeDiameter = this.cubeRadius * 2;
+        this.midDistance = 0;
         this.direction = cubeDirection.None;
         this.rtDirect = rotateDirection.Clockwise;
         this.targetAngle = 0;
         this.animationSpeed = 1;
         this.rotateShowUUid = "";
         this.dic = {};
+        this.isReturn = false;
         this.scene = scene;
         this.cubeArr = new Array();
         this.maxRanks = num;
+        this.midDistance = 1 / 2 * (this.maxRanks * this.cubeDiameter + (this.maxRanks - 1) * this.cubeOffset);
         //正方体6个面，每个面num*num
         this.createMagicCube(num);
     }
@@ -60,6 +69,7 @@ export class MagicCube {
      */
     createMagicCube(num) {
         let ix, iy, iz = 0;
+        let isMid = false;
         for (ix = 0; ix < num; ix++) {
             for (iy = 0; iy < num; iy++) {
                 for (iz = 0; iz < num; iz++) {
@@ -74,7 +84,14 @@ export class MagicCube {
             }
         }
     }
+    getIsMid(x, y, z) {
+        let xnum = x == this.midDistance ? 1 : 0;
+        let ynum = y == this.midDistance ? 1 : 0;
+        let znum = z == this.midDistance ? 1 : 0;
+        return xnum + ynum + znum == 2;
+    }
     createCube(x, y, z, dirs) {
+        let isMid = this.getIsMid(x, y, z);
         // console.log('xyz:', x, y, z);
         const geometry = new THREE.BoxGeometry(this.cubeDiameter, this.cubeDiameter, this.cubeDiameter);
         let mats = [];
@@ -98,7 +115,8 @@ export class MagicCube {
         cube.applyMatrix4(cube_matrix);
         var cubeAxis = new THREE.AxesHelper(2);
         cube.add(cubeAxis);
-        this.cubeArr.push(cube);
+        let sCube = new smallCube(cube, isMid);
+        this.cubeArr.push(sCube);
         this.scene.add(cube);
     }
     getCubeDir(ix, iy, iz, maxNum) {
@@ -157,7 +175,7 @@ export class MagicCube {
     }
     getMidCube(direction) {
         for (let i = 0; i < this.cubeArr.length; i++) {
-            let item = this.cubeArr[i];
+            let item = this.cubeArr[i].mesh;
             //local position
             // let position = item.position;
             //world position
@@ -220,7 +238,7 @@ export class MagicCube {
             //local position
             // let position = item.position;
             //world position
-            let worldPositon = this.getWorldPosition(item);
+            let worldPositon = this.getWorldPosition(item.mesh);
             switch (direction) {
                 case cubeDirection.Right:
                     if (this.isFloatSame(worldPositon.x, rightSign)) {
@@ -264,7 +282,11 @@ export class MagicCube {
         return resultArr;
     }
     getCubes() {
-        return this.cubeArr;
+        let array = new Array();
+        this.cubeArr.forEach(item => {
+            array.push(item.mesh);
+        });
+        return array;
     }
     resetAnimateInfo() {
         this.direction = cubeDirection.None;
@@ -331,7 +353,7 @@ export class MagicCube {
         let mideBaseVec = this.getBasisVec(midCube.matrix);
         let mideCubeWorldPos = this.getWorldPosition(midCube);
         for (let index = 0; index < arr.length; index++) {
-            const item = arr[index];
+            const item = arr[index].mesh;
             let itemWorldPos = this.getWorldPosition(item);
             let relativePos = new Vector3(itemWorldPos.x - mideCubeWorldPos.x, itemWorldPos.y - mideCubeWorldPos.y, itemWorldPos.z - mideCubeWorldPos.z);
             // 世界空间的相对位置，转成基于中间方块坐标系下的相对位置
@@ -350,6 +372,12 @@ export class MagicCube {
         }
         return null;
     }
+    /**
+     * setIsReturn
+     */
+    setIsReturn() {
+        this.isReturn = !this.isReturn;
+    }
     rotateImediate(direction, rtDirect, angle) {
         let arr = this.getFaceCube(direction);
         let resultAngle = 0;
@@ -363,76 +391,91 @@ export class MagicCube {
         let absAngle = Math.abs(angle);
         resultAngle = resultAngle * absAngle;
         // console.log("resultAngle: ", resultAngle);
-        let midCube = this.getMidCube(direction);
-        let midCube_matrix = midCube.matrix;
+        // let midCube = this.getMidCube(direction);
+        let filterResult = arr.filter(item => item.isMid == true);
+        if (filterResult.length <= 0) {
+            console.log("No mid");
+            return;
+        }
+        let midCube = filterResult[0].mesh;
+        const midCube_matrix = midCube.matrix;
         // console.log("++++++++++++++++++++++++++++++++++");
         for (let i = 0; i < arr.length; i++) {
-            let item = arr[i];
+            let item = arr[i].mesh;
             let offsetPos = this.getRelativePos(item.uuid);
             // item.visible = item == midCube;
             if (this.rotateShowUUid != "") {
                 // || item == midCube
-                item.visible = item.uuid == this.rotateShowUUid;
+                item.visible = item.uuid == this.rotateShowUUid || item == midCube;
             }
             else {
                 item.visible = true;
             }
-            if (this.isBaseVecEqual(item.matrix, midCube_matrix)) {
-                // 基坐标一致，移动方块=把方块等于中心方块-旋转-平移 
-                item.matrix = midCube_matrix.clone();
-                if (direction == cubeDirection.Left || direction == cubeDirection.Right) {
-                    item.matrix.multiply(new THREE.Matrix4().makeRotationX(resultAngle));
-                    item.matrix.multiply(new THREE.Matrix4().makeTranslation(offsetPos.x, offsetPos.y, offsetPos.z));
-                }
-                else if (direction == cubeDirection.Up || direction == cubeDirection.Down) {
-                    item.matrix.multiply(new THREE.Matrix4().makeRotationY(resultAngle));
-                    item.matrix.multiply(new THREE.Matrix4().makeTranslation(offsetPos.x, offsetPos.y, offsetPos.z));
-                }
-                else if (direction == cubeDirection.Front || direction == cubeDirection.Back) {
-                    item.matrix.multiply(new THREE.Matrix4().makeRotationZ(resultAngle));
-                    item.matrix.multiply(new THREE.Matrix4().makeTranslation(offsetPos.x, offsetPos.y, offsetPos.z));
-                }
-            }
-            else {
-                //基坐标不一致，移动方块
-                let itemBaseVec = this.getBasisVec(item.matrix);
-                // console.log('itemBaseVec:', itemBaseVec);
-                let mideCubeWorldPos = this.getWorldPosition(midCube);
-                let itemWorldPos = this.getWorldPosition(item);
-                let offset = new Vector3(mideCubeWorldPos.x - itemWorldPos.x, mideCubeWorldPos.y - itemWorldPos.y, mideCubeWorldPos.z - itemWorldPos.z);
-                // if (item.visible) {
-                //世界坐标系的偏移转换到局部坐标系的偏移
-                let offset2Base = this.vectorChangBasic(offset, itemBaseVec);
-                // 在局部坐标系下，平移到中间
-                let translate2Mid = new Matrix4().makeTranslation(offset2Base.x, offset2Base.y, offset2Base.z);
-                item.matrix.multiply(translate2Mid);
-                // console.log('offset: ', offset);
-                // console.log('offset2Base: ', offset2Base);
-                // }
-                // let angle = 1 * Math.PI / 180;
-                // let absAngle = Math.abs(angle);
-                // // item.matrix.multiply(new THREE.Matrix4().makeRotationY(absAngle));
-                // // item.matrix.multiply(new THREE.Matrix4().makeRotationY(resultAngle));
-                let worldBaseVec = new baseVectorObj(new Vector3(1, 0, 0), new Vector3(0, 1, 0), new Vector3(0, 0, 1));
-                if (direction == cubeDirection.Front || direction == cubeDirection.Back) {
-                    let yDotZ = itemBaseVec.y.dot(worldBaseVec.z);
-                    let isYZSameLine = Math.abs(yDotZ) == 1; //不管同向还是反向，是否共线
-                    if (this.isVectSameDirection(itemBaseVec.z, worldBaseVec.z)) {
-                        console.log('z,same z');
-                        // item.matrix.multiply(new THREE.Matrix4().makeRotationZ(resultAngle));
+            if (item.visible) {
+                if (this.isBaseVecEqual(item.matrix, midCube_matrix)) {
+                    // 基坐标一致，移动方块=把方块等于中心方块-旋转-平移 
+                    item.matrix = midCube_matrix.clone();
+                    if (direction == cubeDirection.Left || direction == cubeDirection.Right) {
+                        item.matrix.multiply(new THREE.Matrix4().makeRotationX(resultAngle));
+                        item.matrix.multiply(new THREE.Matrix4().makeTranslation(offsetPos.x, offsetPos.y, offsetPos.z));
                     }
-                    else if (isYZSameLine) {
-                        console.log('y,same z');
-                        item.matrix.multiply(new THREE.Matrix4().makeRotationY(yDotZ * resultAngle));
+                    else if (direction == cubeDirection.Up || direction == cubeDirection.Down) {
+                        item.matrix.multiply(new THREE.Matrix4().makeRotationY(resultAngle));
+                        item.matrix.multiply(new THREE.Matrix4().makeTranslation(offsetPos.x, offsetPos.y, offsetPos.z));
                     }
-                    else if (this.isVectSameDirection(itemBaseVec.x, worldBaseVec.z)) {
-                        console.log('x,same z');
-                        // item.matrix.multiply(new THREE.Matrix4().makeRotationX(resultAngle));
+                    else if (direction == cubeDirection.Front || direction == cubeDirection.Back) {
+                        item.matrix.multiply(new THREE.Matrix4().makeRotationZ(resultAngle));
+                        item.matrix.multiply(new THREE.Matrix4().makeTranslation(offsetPos.x, offsetPos.y, offsetPos.z));
                     }
-                    console.log('offsetPos', offsetPos);
-                    var mat4I = new THREE.Matrix4();
-                    mat4I.getInverse(translate2Mid);
-                    item.matrix.multiply(mat4I);
+                }
+                else {
+                    //基坐标不一致，移动方块
+                    let itemBaseVec = this.getBasisVec(item.matrix);
+                    // console.log('itemBaseVec:', itemBaseVec);
+                    let mideCubeWorldPos = this.getWorldPosition(midCube);
+                    let itemWorldPos = this.getWorldPosition(item);
+                    let offset = new Vector3(mideCubeWorldPos.x - itemWorldPos.x, mideCubeWorldPos.y - itemWorldPos.y, mideCubeWorldPos.z - itemWorldPos.z);
+                    //世界坐标系的偏移转换到局部坐标系的偏移
+                    let offset2Base = this.vectorChangBasic(offset, itemBaseVec);
+                    // 在局部坐标系下，平移到中间
+                    let translate2Mid = new Matrix4().makeTranslation(offset2Base.x, offset2Base.y, offset2Base.z);
+                    item.matrix.multiply(translate2Mid);
+                    // let angle = 1 * Math.PI / 180;
+                    // let absAngle = Math.abs(angle);
+                    // // item.matrix.multiply(new THREE.Matrix4().makeRotationY(absAngle));
+                    // // item.matrix.multiply(new THREE.Matrix4().makeRotationY(resultAngle));
+                    let worldBaseVec = new baseVectorObj(new Vector3(1, 0, 0), new Vector3(0, 1, 0), new Vector3(0, 0, 1));
+                    if (direction == cubeDirection.Front || direction == cubeDirection.Back) {
+                        let yDotZ = itemBaseVec.y.dot(worldBaseVec.z);
+                        let isYZSameLine = Math.abs(yDotZ) == 1; //不管同向还是反向，是否共线
+                        if (this.isVectSameDirection(itemBaseVec.z, worldBaseVec.z)) {
+                            // console.log('z,same z');
+                            // item.matrix.multiply(new THREE.Matrix4().makeRotationZ(resultAngle));
+                        }
+                        else if (isYZSameLine) {
+                            // console.log('y,same z');
+                            item.matrix.multiply(new THREE.Matrix4().makeRotationY(yDotZ * resultAngle));
+                        }
+                        else if (this.isVectSameDirection(itemBaseVec.x, worldBaseVec.z)) {
+                            // console.log('x,same z');
+                            // item.matrix.multiply(new THREE.Matrix4().makeRotationX(resultAngle));
+                        }
+                        // console.log('offsetPos', offsetPos);
+                        var mat4I = new THREE.Matrix4();
+                        mat4I.copy(translate2Mid).invert(); // mat4I.getInverse(translate2Mid);
+                        item.matrix.multiply(mat4I);
+                    }
+                    else if (direction == cubeDirection.Left || direction == cubeDirection.Right) {
+                        console.log('left/right');
+                        let yDotX = itemBaseVec.y.dot(worldBaseVec.x);
+                        let isYXSameLine = Math.abs(yDotX) == 1; //不管同向还是反向，是否共线
+                        if (isYXSameLine) {
+                            item.matrix.multiply(new THREE.Matrix4().makeRotationY(yDotX * resultAngle));
+                        }
+                        var mat4I = new THREE.Matrix4();
+                        mat4I.copy(translate2Mid).invert(); // mat4I.getInverse(translate2Mid);
+                        item.matrix.multiply(mat4I);
+                    }
                 }
             }
         }

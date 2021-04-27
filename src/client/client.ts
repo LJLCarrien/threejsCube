@@ -187,7 +187,8 @@ function animate() {
 };
 
 $("#rotateClockwise").click(function () {
-    magicCube.rotate(cubeDirection.Up, rotateDirection.Clockwise, 90);
+    magicCube.setIsReturn();
+    // magicCube.rotate(cubeDirection.Up, rotateDirection.Clockwise, 90);
 })
 
 $("#rotateAntiClockwise").click(function () {
