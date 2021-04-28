@@ -94,50 +94,49 @@ function createAxis() {
 }
 
 function oneKeyDown(e: KeyboardEvent) {
-    // console.log(e.keyCode);
+    console.log(e.keyCode);
     let isNeedRotate = false;
     switch (e.keyCode) {
-        case 87:
+        case 87: case 73:
             console.log("Up");
             curCubeDirection = cubeDirection.Up;
             isNeedRotate = true;
+            curRotateDirection = e.keyCode == 87 ? rotateDirection.Clockwise : rotateDirection.AntiClockwise;
             break;
-        case 83:
+        case 83: case 75:
             console.log("Down");
             curCubeDirection = cubeDirection.Down;
             isNeedRotate = true;
+            curRotateDirection = e.keyCode == 83 ? rotateDirection.Clockwise : rotateDirection.AntiClockwise;
             break;
-        case 65:
+        case 65: case 74:
             console.log("Left");
             curCubeDirection = cubeDirection.Left;
             isNeedRotate = true;
+            curRotateDirection = e.keyCode == 65 ? rotateDirection.Clockwise : rotateDirection.AntiClockwise;
             break;
-        case 68:
+        case 68: case 76:
             console.log("Right");
             curCubeDirection = cubeDirection.Right;
             isNeedRotate = true;
+            curRotateDirection = e.keyCode == 68 ? rotateDirection.Clockwise : rotateDirection.AntiClockwise;
             break;
-        case 81:
+        case 81: case 85:
             console.log("Front");
             curCubeDirection = cubeDirection.Front;
             isNeedRotate = true;
+            curRotateDirection = e.keyCode == 81 ? rotateDirection.Clockwise : rotateDirection.AntiClockwise;
             break;
-        case 69:
+        case 69: case 79:
             console.log("Back");
             curCubeDirection = cubeDirection.Back;
             isNeedRotate = true;
-            break;
-        case 74:
-            console.log("J 切换顺时针");
-            curRotateDirection = rotateDirection.Clockwise;
-            break;
-        case 75:
-            console.log("K 切换逆时针");
-            curRotateDirection = rotateDirection.AntiClockwise;
+            curRotateDirection = e.keyCode == 69 ? rotateDirection.Clockwise : rotateDirection.AntiClockwise;
             break;
         default:
             break;
     }
+    console.log(curRotateDirection == rotateDirection.Clockwise ? "顺时针" : "逆时针");
 
     if (isNeedRotate) {
         // console.log(curRotateDirection)
