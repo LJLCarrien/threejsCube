@@ -94,7 +94,7 @@ function createAxis() {
 }
 
 function oneKeyDown(e: KeyboardEvent) {
-    console.log(e.keyCode);
+    // console.log(e.keyCode);
     let isNeedRotate = false;
     switch (e.keyCode) {
         case 87: case 73:
@@ -136,7 +136,7 @@ function oneKeyDown(e: KeyboardEvent) {
         default:
             break;
     }
-    console.log(curRotateDirection == rotateDirection.Clockwise ? "顺时针" : "逆时针");
+    // console.log(curRotateDirection == rotateDirection.Clockwise ? "顺时针" : "逆时针");
 
     if (isNeedRotate) {
         // console.log(curRotateDirection)
@@ -231,7 +231,7 @@ function onDocumentMouseDown(event) {
         console.log('localPos:', obj.position, 'worldPos:', worldPos);
 
         magicCube.setRotateShowUUid(obj.uuid);
-        console.log(obj.uuid);
+        // console.log(obj.uuid);
     }
 }
 window.addEventListener('click', onDocumentMouseDown, false);
