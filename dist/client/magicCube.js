@@ -59,11 +59,11 @@ export class MagicCube {
     // 结论：两个旋转结果不同，是因为最后一个平移决定的。绕自身旋转后，自身坐标系发生变化，所以平移后的位置不再是原位置，表现为绕轴旋转
     createTestCube() {
         //0
-        let dirs = this.getCubeDir(0, 0, 0, 3);
-        this.createCube(0, 0, 0, dirs);
+        let dirs = this.getCubeDir(1, 0, 0, 3);
+        this.createCube(1, 0, 0, dirs);
         //1
-        dirs = this.getCubeDir(8, 0, 0, 3);
-        this.createCube(8, 0, 0, dirs);
+        dirs = this.getCubeDir(3.1, 0, 0, 3);
+        this.createCube(3.1, 0, 0, dirs);
     }
     // 世界平移-自身旋转-世界平移的逆(表现为原地旋转)
     worldTranslation_SelfRotate() {
@@ -95,6 +95,15 @@ export class MagicCube {
         let mat4I = new THREE.Matrix4();
         mat4I.getInverse(goZeroMatrix);
         this.cubeArr[1].matrix.multiply(mat4I);
+        console.log("-----------------位置归正");
+        let worldPositon = new THREE.Vector3();
+        this.cubeArr[1].getWorldPosition(worldPositon);
+        console.log("worldPositon:", worldPositon);
+        let newWorldPositon = roundPosition(worldPositon);
+        console.log("roundWorldPosition:", newWorldPositon);
+        let offset = newWorldPositon.sub(worldPositon);
+        this.cubeArr[1].matrix.premultiply(new THREE.Matrix4().makeTranslation(offset.x, offset.y, offset.z));
+        console.log("worldPositon:", this.cubeArr[1].getWorldPosition(worldPositon));
     }
     //#endregion
     /**
@@ -195,7 +204,9 @@ export class MagicCube {
     getWorldPosition(obj) {
         let worldPositon = new THREE.Vector3();
         obj.getWorldPosition(worldPositon);
+        // console.log("result:", worldPositon);
         worldPositon = roundPosition(worldPositon);
+        // console.log("roudResult:", worldPositon);
         return worldPositon;
     }
     getMidCube(direction) {

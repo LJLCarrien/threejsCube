@@ -1,6 +1,7 @@
 import * as THREE from '/build/three.module.js'
 import { Matrix4, Vector3 } from '/build/three.module.js';
 import { roundPosition } from "./vectorHelper";
+import { off } from 'process';
 
 // 以下按照面的渲染顺序排序(上黄下白，前蓝后绿，左橙右红)
 export enum rotateDirection {
@@ -61,12 +62,12 @@ export class MagicCube {
     // 结论：两个旋转结果不同，是因为最后一个平移决定的。绕自身旋转后，自身坐标系发生变化，所以平移后的位置不再是原位置，表现为绕轴旋转
     public createTestCube() {
         //0
-        let dirs = this.getCubeDir(0, 0, 0, 3);
-        this.createCube(0, 0, 0, dirs);
+        let dirs = this.getCubeDir(1, 0, 0, 3);
+        this.createCube(1, 0, 0, dirs);
 
         //1
-        dirs = this.getCubeDir(8, 0, 0, 3);
-        this.createCube(8, 0, 0, dirs);
+        dirs = this.getCubeDir(3.1, 0, 0, 3);
+        this.createCube(3.1, 0, 0, dirs);
 
     }
 
@@ -94,7 +95,7 @@ export class MagicCube {
         let worldOffset = worldPosZero.sub(worldPosOne);
         // 世界空间转局部空间
         let itemBaseVec = this.getBasisVec(this.cubeArr[1].matrix);
-        let localOffset = this.vectorChangBasic(worldOffset,itemBaseVec);
+        let localOffset = this.vectorChangBasic(worldOffset, itemBaseVec);
 
         let goZeroMatrix = new Matrix4().makeTranslation(localOffset.x, localOffset.y, localOffset.z);
         this.cubeArr[1].matrix.multiply(goZeroMatrix);
@@ -107,6 +108,20 @@ export class MagicCube {
         let mat4I = new THREE.Matrix4();
         mat4I.getInverse(goZeroMatrix);
         this.cubeArr[1].matrix.multiply(mat4I);
+
+        console.log("-----------------位置归正");
+
+        let worldPositon = new THREE.Vector3();
+        this.cubeArr[1].getWorldPosition(worldPositon);
+        console.log("worldPositon:", worldPositon);
+
+        let newWorldPositon = roundPosition(worldPositon);
+        console.log("roundWorldPosition:", newWorldPositon);
+
+        let offset = newWorldPositon.sub(worldPositon);
+        this.cubeArr[1].matrix.premultiply(new THREE.Matrix4().makeTranslation(offset.x, offset.y, offset.z));
+
+        console.log("worldPositon:", this.cubeArr[1].getWorldPosition(worldPositon));
     }
     //#endregion
 
@@ -221,7 +236,9 @@ export class MagicCube {
     private getWorldPosition(obj: THREE.Object3D): Vector3 {
         let worldPositon = new THREE.Vector3();
         obj.getWorldPosition(worldPositon);
+        // console.log("result:", worldPositon);
         worldPositon = roundPosition(worldPositon);
+        // console.log("roudResult:", worldPositon);
         return worldPositon;
     }
 
