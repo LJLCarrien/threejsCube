@@ -55,7 +55,6 @@ export class MagicCube {
         this.animationSpeed = 1;
         this.rotateShowUUid = "";
         this.dic = {};
-        this.isReturn = false;
         this.scene = scene;
         this.cubeArr = new Array();
         this.maxRanks = num;
@@ -368,7 +367,7 @@ export class MagicCube {
     roundAll() {
         this.cubeArr.forEach(item => {
             this.makeWorldPositionRound(item.mesh);
-            console.log(item);
+            // console.log(item)
         });
     }
     /**
@@ -395,12 +394,6 @@ export class MagicCube {
             return this.dic[uuid];
         }
         return null;
-    }
-    /**
-     * setIsReturn
-     */
-    setIsReturn() {
-        this.isReturn = !this.isReturn;
     }
     rotateImediate(direction, rtDirect, angle) {
         let arr = this.getFaceCube(direction);

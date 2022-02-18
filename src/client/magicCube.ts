@@ -421,7 +421,7 @@ export class MagicCube {
 
         this.cubeArr.forEach(item => {
             this.makeWorldPositionRound(item.mesh);
-            console.log(item)
+            // console.log(item)
         });
 
     }
@@ -456,13 +456,6 @@ export class MagicCube {
         return null;
     }
 
-    private isReturn: boolean = false;
-    /**
-     * setIsReturn
-     */
-    public setIsReturn() {
-        this.isReturn = !this.isReturn;
-    }
 
     private rotateImediate(direction: cubeDirection, rtDirect: rotateDirection, angle: number) {
         let arr: Array<smallCube> = this.getFaceCube(direction);
