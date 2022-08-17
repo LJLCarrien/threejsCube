@@ -7,7 +7,7 @@ let renderer;
 let camera;
 let controls;
 let magicCube;
-const MAGICCUBE_RANKS = 3;
+const MAGICCUBE_RANKS = 2;
 const MAGICCUBE_ROTATE_SPEED = 10;
 let curCubeDirection = cubeDirection.None;
 let curRotateDirection = rotateDirection.Clockwise;
@@ -121,7 +121,8 @@ $("#imediateApply").on("click", function () {
     magicCube.imediateApply();
 });
 $("#test").on("click", function () {
-    magicCube.test();
+    // magicCube.test();
+    // console.log(camera.position);
 });
 var raycaster = new THREE.Raycaster();
 var mouse = new THREE.Vector2();
@@ -136,8 +137,8 @@ function onWDocMouseDown(event) {
         // console.log(obj.position, obj.quaternion, obj.scale);
         var worldPos = new THREE.Vector3();
         obj.getWorldPosition(worldPos);
-        worldPos = roundPosition(worldPos);
-        console.log('localPos:', obj.position, 'worldPos:', worldPos);
+        var roudnWorldPos = roundPosition(worldPos);
+        console.log('localPos:', obj.position, 'roudnWorldPos:', roudnWorldPos, 'worldPos:', worldPos);
         magicCube.setRotateShowUUid(obj.uuid);
         // console.log(obj.uuid);
     }

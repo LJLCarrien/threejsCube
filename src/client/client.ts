@@ -9,7 +9,7 @@ let camera: THREE.Camera;
 let controls: OrbitControls;
 
 let magicCube: MagicCube;
-const MAGICCUBE_RANKS = 3;
+const MAGICCUBE_RANKS = 2;
 const MAGICCUBE_ROTATE_SPEED = 10;
 
 let curCubeDirection: cubeDirection = cubeDirection.None;
@@ -147,7 +147,8 @@ $("#imediateApply").on("click", function () {
 })
 
 $("#test").on("click", function () {
-    magicCube.test();
+    // magicCube.test();
+    // console.log(camera.position);
 })
 
 
@@ -171,9 +172,9 @@ function onWDocMouseDown(event) {
 
         var worldPos = new THREE.Vector3();
         obj.getWorldPosition(worldPos);
-        worldPos = roundPosition(worldPos);
+        var roudnWorldPos = roundPosition(worldPos);
 
-        console.log('localPos:', obj.position, 'worldPos:', worldPos);
+        console.log('localPos:', obj.position, 'roudnWorldPos:', roudnWorldPos, 'worldPos:', worldPos);
 
         magicCube.setRotateShowUUid(obj.uuid);
         // console.log(obj.uuid);

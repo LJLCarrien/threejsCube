@@ -1,7 +1,6 @@
 import * as THREE from '/build/three.module.js'
-import { ArrowHelper, AxesHelper, Matrix4, Vector3 } from '/build/three.module.js';
+import { AxesHelper, Matrix4, Vector3 } from '/build/three.module.js';
 import { roundPosition } from "./vectorHelper";
-import { chown } from 'fs';
 
 // 以下按照面的渲染顺序排序(上黄下白，前蓝后绿，左橙右红)
 export enum rotateDirection {
@@ -68,11 +67,11 @@ export class MagicCube {
     //是否显示面中心方块的局部坐标系
     private isShowMidAxis: Array<boolean> = new Array(
         // Right,Left,
-        false, false,
+        true, false,
         // Up,Down,
         false, false,
         // Front,Back
-        false, true,
+        false, false,
     );
 
     constructor(scene: THREE.Scene, num: number) {
@@ -82,7 +81,7 @@ export class MagicCube {
         this.maxDistance = this.maxRanks * this.cubeDiameter + (this.maxRanks - 1) * this.cubeOffset;
         this.midDistance = 1 / 2 * this.maxDistance;
 
-        this.setIsShowMidAxis(true);
+        // this.setIsShowMidAxis(true);
 
         //正方体6个面，每个面num*num
         this.createMagicCube(num)
@@ -151,6 +150,7 @@ export class MagicCube {
 
             }
         }
+        console.log(this.midPointArr);
     }
 
     private getMidAxes(direction: cubeDirection): AxesHelper {
@@ -290,10 +290,11 @@ export class MagicCube {
         console.log();
         let worldPositon = new THREE.Vector3();
         obj.getWorldPosition(worldPositon);
-        // console.log("1 worldPositon:", worldPositon);
+        console.log("--------------");
+        console.log("1 worldPositon:", worldPositon);
 
         let newWorldPositon = roundPosition(worldPositon);
-        // console.log("2 roundWorldPosition:", newWorldPositon);
+        console.log("2 roundWorldPosition:", newWorldPositon);
 
         let offset = newWorldPositon.sub(worldPositon);
         obj.matrix.premultiply(new THREE.Matrix4().makeTranslation(offset.x, offset.y, offset.z));
@@ -526,19 +527,23 @@ export class MagicCube {
 
         let arr: Array<smallCube> = this.getFaceCube(direction);
 
-        let midCube = this.getMidCube(direction);
+        // let midCube = this.getMidCube(direction);
+        let midCube = this.midPointArr[direction];
+
         let mideBaseVec: baseVectorObj = this.getBasisVec(midCube.matrix);
         let mideCubeWorldPos = this.getWorldPosition(midCube);
 
-        let midAxis = this.getMidAxes(direction);
-        let mideBaseVec2: baseVectorObj = this.getBasisVec(midAxis.matrix);
-        let mideCubeWorldPos2 = this.getWorldPosition(midAxis);
-        console.log('----------------------------------')
-        console.log(mideBaseVec, mideBaseVec2)
-        console.log(mideCubeWorldPos, mideCubeWorldPos2)
+        // let midAxis = this.getMidAxes(direction);
+        // let mideBaseVec2: baseVectorObj = this.getBasisVec(midAxis.matrix);
+        // let mideCubeWorldPos2 = this.getWorldPosition(midAxis);
+        // console.log('----------------------------------')
+        // console.log(mideBaseVec, mideBaseVec2)
+        // console.log(mideCubeWorldPos, mideCubeWorldPos2)
         for (let index = 0; index < arr.length; index++) {
             const item = arr[index].mesh;
             let itemWorldPos = this.getWorldPosition(item);
+            console.log('item_world_pos',itemWorldPos);
+            console.log('item_world_pos',itemWorldPos);
             let relativePos: Vector3 = new Vector3(itemWorldPos.x - mideCubeWorldPos.x, itemWorldPos.y - mideCubeWorldPos.y, itemWorldPos.z - mideCubeWorldPos.z);
 
             // 世界空间的相对位置，转成基于中间方块坐标系下的相对位置
@@ -578,14 +583,19 @@ export class MagicCube {
         resultAngle = resultAngle * absAngle;
         // console.log("resultAngle: ", resultAngle);
         // let midCube = this.getMidCube(direction);
-        let filterResult = arr.filter(item => item.isMid == true)
-        if (filterResult.length <= 0) {
-            console.log("No mid");
-            return;
-        }
-        let midCube = filterResult[0].mesh;
-        const midCube_matrix: Matrix4 = midCube.matrix;
+
+        // // let filterResult = arr.filter(item => item.isMid == true)
+        // // if (filterResult.length <= 0 && this.maxRanks % 1 == 1) {
+        // //     console.log("No mid");
+        // //     return;
+        // // }
+        // // let midCube = filterResult[0].mesh;
+        // // const midCube_matrix: Matrix4 = midCube.matrix;
         // console.log("++++++++++++++++++++++++++++++++++");
+
+        let midCube = this.midPointArr[direction];
+        const midCube_matrix: Matrix4 = midCube.matrix;
+
 
         //旋转虚拟中心点
         let midAxes = this.getMidAxes(direction);
@@ -604,10 +614,9 @@ export class MagicCube {
 
             let offsetPos: Vector3 = this.getRelativePos(item.uuid);
 
-            // item.visible = item == midCube;
             if (this.rotateShowUUid != "") {
-                // || item == midCube
-                item.visible = item.uuid == this.rotateShowUUid || item == midCube;
+                // item.visible = item.uuid == this.rotateShowUUid || item == midCube;
+                item.visible = item.uuid == this.rotateShowUUid;
             }
             else {
                 item.visible = true;
