@@ -1,5 +1,5 @@
 import * as THREE from '/build/three.module.js';
-import { Matrix4, Vector3 } from '/build/three.module.js';
+import { AxesHelper, Matrix4, Vector3 } from '/build/three.module.js';
 import { roundPosition } from "./vectorHelper";
 // 以下按照面的渲染顺序排序(上黄下白，前蓝后绿，左橙右红)
 export var rotateDirection;
@@ -29,6 +29,9 @@ export var cubeColor;
     cubeColor["Blue"] = "#336699";
     cubeColor["Green"] = "#739e3b";
 })(cubeColor || (cubeColor = {}));
+/**
+ * 基坐标系
+ */
 export class baseVectorObj {
     constructor(x, y, z) {
         this.x = x;
@@ -49,6 +52,16 @@ export class MagicCube {
         this.cubeRadius = 1;
         this.cubeDiameter = this.cubeRadius * 2;
         this.midDistance = 0;
+        this.maxDistance = 0;
+        this.bShowCubeAxes = false;
+        //是否显示面中心方块的局部坐标系
+        this.isShowMidAxis = new Array(
+        // Right,Left,
+        false, false, 
+        // Up,Down,
+        false, false, 
+        // Front,Back
+        false, true);
         this.direction = cubeDirection.None;
         this.rtDirect = rotateDirection.Clockwise;
         this.targetAngle = 0;
@@ -58,9 +71,88 @@ export class MagicCube {
         this.scene = scene;
         this.cubeArr = new Array();
         this.maxRanks = num;
-        this.midDistance = 1 / 2 * (this.maxRanks * this.cubeDiameter + (this.maxRanks - 1) * this.cubeOffset);
+        this.maxDistance = this.maxRanks * this.cubeDiameter + (this.maxRanks - 1) * this.cubeOffset;
+        this.midDistance = 1 / 2 * this.maxDistance;
+        this.setIsShowMidAxis(true);
         //正方体6个面，每个面num*num
         this.createMagicCube(num);
+        this.initMidPointArr();
+    }
+    setIsShowMidAxis(isShow) {
+        for (let i in cubeDirection) {
+            let n = Number(i);
+            if (!isNaN(n) && n != -1) {
+                this.isShowMidAxis[n] = isShow;
+            }
+        }
+    }
+    initMidPointArr() {
+        this.midPointArr = new Array(6);
+        for (let dir in cubeDirection) {
+            let dirIndex = Number(dir);
+            if (!isNaN(dirIndex) && dirIndex != -1) {
+                var cubeAxis = new AxesHelper(1);
+                cubeAxis.matrixAutoUpdate = false;
+                cubeAxis.visible = this.isShowMidAxis[dirIndex];
+                let matrix = new THREE.Matrix4();
+                switch (dirIndex) {
+                    case cubeDirection.Right:
+                        cubeAxis.matrix.multiply(new THREE.Matrix4().makeTranslation(this.maxDistance - this.cubeRadius, this.midDistance, this.midDistance));
+                        cubeAxis.applyMatrix4(matrix);
+                        // cubeAxis.translateOnAxis(new Vector3(0, 1, 1), this.midDistance);
+                        // cubeAxis.translateOnAxis(new Vector3(1, 0, 0), 2 * this.midDistance - this.cubeRadius);
+                        this.midPointArr[cubeDirection.Right] = cubeAxis;
+                        // console.log('Right', cubeAxis.position);
+                        break;
+                    case cubeDirection.Left:
+                        cubeAxis.matrix.multiply(new THREE.Matrix4().makeTranslation(this.cubeRadius, this.midDistance, this.midDistance));
+                        cubeAxis.applyMatrix4(matrix);
+                        //     cubeAxis.translateOnAxis(new Vector3(0, 1, 1), this.midDistance);
+                        //     cubeAxis.translateOnAxis(new Vector3(1, 0, 0), this.cubeRadius);
+                        this.midPointArr[cubeDirection.Left] = cubeAxis;
+                        //     // console.log('Left', cubeAxis.position);
+                        break;
+                    case cubeDirection.Up:
+                        cubeAxis.matrix.multiply(new THREE.Matrix4().makeTranslation(this.midDistance, this.maxDistance - this.cubeRadius, this.midDistance));
+                        cubeAxis.applyMatrix4(matrix);
+                        //     cubeAxis.translateOnAxis(new Vector3(1, 0, 1), this.midDistance);
+                        //     cubeAxis.translateOnAxis(new Vector3(0, 1, 0), 2 * this.midDistance - this.cubeRadius);
+                        this.midPointArr[cubeDirection.Up] = cubeAxis;
+                        //     // console.log('Up', cubeAxis.position);
+                        break;
+                    case cubeDirection.Down:
+                        cubeAxis.matrix.multiply(new THREE.Matrix4().makeTranslation(this.midDistance, this.cubeRadius, this.midDistance));
+                        cubeAxis.applyMatrix4(matrix);
+                        //     cubeAxis.translateOnAxis(new Vector3(1, 0, 1), this.midDistance);
+                        //     cubeAxis.translateOnAxis(new Vector3(0, 1, 0), this.cubeRadius);
+                        this.midPointArr[cubeDirection.Down] = cubeAxis;
+                        //     // console.log('Down', cubeAxis.position);
+                        break;
+                    case cubeDirection.Front:
+                        cubeAxis.matrix.multiply(new THREE.Matrix4().makeTranslation(this.midDistance, this.midDistance, this.maxDistance - this.cubeRadius));
+                        cubeAxis.applyMatrix4(matrix);
+                        //     cubeAxis.translateOnAxis(new Vector3(1, 1, 0), this.midDistance);
+                        //     cubeAxis.translateOnAxis(new Vector3(0, 0, 1), 2 * this.midDistance - this.cubeRadius);
+                        this.midPointArr[cubeDirection.Front] = cubeAxis;
+                        //     // console.log('Front', cubeAxis.position);
+                        break;
+                    case cubeDirection.Back:
+                        cubeAxis.matrix.multiply(new THREE.Matrix4().makeTranslation(this.midDistance, this.midDistance, this.cubeRadius));
+                        cubeAxis.applyMatrix4(matrix);
+                        //     cubeAxis.translateOnAxis(new Vector3(1, 1, 0), this.midDistance);
+                        //     cubeAxis.translateOnAxis(new Vector3(0, 0, 1), this.cubeRadius);
+                        this.midPointArr[cubeDirection.Back] = cubeAxis;
+                        //     // console.log('Back', cubeAxis.position);
+                        break;
+                    // default:
+                    //     break;
+                }
+                this.scene.add(cubeAxis);
+            }
+        }
+    }
+    getMidAxes(direction) {
+        return this.midPointArr[direction];
     }
     /**
      * nxnxn的立方体
@@ -68,7 +160,6 @@ export class MagicCube {
      */
     createMagicCube(num) {
         let ix, iy, iz = 0;
-        let isMid = false;
         for (ix = 0; ix < num; ix++) {
             for (iy = 0; iy < num; iy++) {
                 for (iz = 0; iz < num; iz++) {
@@ -112,8 +203,10 @@ export class MagicCube {
         let cube_matrix = new THREE.Matrix4();
         cube_matrix.multiply(new THREE.Matrix4().makeTranslation(x, y, z));
         cube.applyMatrix4(cube_matrix);
-        var cubeAxis = new THREE.AxesHelper(2);
-        cube.add(cubeAxis);
+        if (this.bShowCubeAxes) {
+            var cubeAxis = new THREE.AxesHelper(2);
+            cube.add(cubeAxis);
+        }
         let sCube = new smallCube(cube, isMid);
         this.cubeArr.push(sCube);
         this.scene.add(cube);
@@ -379,6 +472,12 @@ export class MagicCube {
         let midCube = this.getMidCube(direction);
         let mideBaseVec = this.getBasisVec(midCube.matrix);
         let mideCubeWorldPos = this.getWorldPosition(midCube);
+        let midAxis = this.getMidAxes(direction);
+        let mideBaseVec2 = this.getBasisVec(midAxis.matrix);
+        let mideCubeWorldPos2 = this.getWorldPosition(midAxis);
+        console.log('----------------------------------');
+        console.log(mideBaseVec, mideBaseVec2);
+        console.log(mideCubeWorldPos, mideCubeWorldPos2);
         for (let index = 0; index < arr.length; index++) {
             const item = arr[index].mesh;
             let itemWorldPos = this.getWorldPosition(item);
@@ -394,6 +493,12 @@ export class MagicCube {
             return this.dic[uuid];
         }
         return null;
+    }
+    test() {
+        let midAxes = this.getMidAxes(cubeDirection.Right);
+        midAxes.matrix.multiply(new THREE.Matrix4().makeRotationX(90));
+        let result = this.getBasisVec(midAxes.matrix);
+        console.log(result);
     }
     rotateImediate(direction, rtDirect, angle) {
         let arr = this.getFaceCube(direction);
@@ -417,6 +522,17 @@ export class MagicCube {
         let midCube = filterResult[0].mesh;
         const midCube_matrix = midCube.matrix;
         // console.log("++++++++++++++++++++++++++++++++++");
+        //旋转虚拟中心点
+        let midAxes = this.getMidAxes(direction);
+        if (direction == cubeDirection.Left || direction == cubeDirection.Right) {
+            midAxes.matrix.multiply(new THREE.Matrix4().makeRotationX(resultAngle));
+        }
+        else if (direction == cubeDirection.Up || direction == cubeDirection.Down) {
+            midAxes.matrix.multiply(new THREE.Matrix4().makeRotationY(resultAngle));
+        }
+        else if (direction == cubeDirection.Front || direction == cubeDirection.Back) {
+            midAxes.matrix.multiply(new THREE.Matrix4().makeRotationZ(resultAngle));
+        }
         for (let i = 0; i < arr.length; i++) {
             let item = arr[i].mesh;
             let offsetPos = this.getRelativePos(item.uuid);

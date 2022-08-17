@@ -146,6 +146,10 @@ $("#imediateApply").on("click", function () {
     magicCube.imediateApply();
 })
 
+$("#test").on("click", function () {
+    magicCube.test();
+})
+
 
 
 var raycaster = new THREE.Raycaster();

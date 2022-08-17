@@ -120,6 +120,9 @@ $("#clearShowUUid").on("click", function () {
 $("#imediateApply").on("click", function () {
     magicCube.imediateApply();
 });
+$("#test").on("click", function () {
+    magicCube.test();
+});
 var raycaster = new THREE.Raycaster();
 var mouse = new THREE.Vector2();
 function onWDocMouseDown(event) {
