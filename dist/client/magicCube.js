@@ -99,53 +99,35 @@ export class MagicCube {
                     case cubeDirection.Right:
                         cubeAxis.matrix.multiply(new THREE.Matrix4().makeTranslation(this.maxDistance - this.cubeRadius, this.midDistance, this.midDistance));
                         cubeAxis.applyMatrix4(matrix);
-                        // cubeAxis.translateOnAxis(new Vector3(0, 1, 1), this.midDistance);
-                        // cubeAxis.translateOnAxis(new Vector3(1, 0, 0), 2 * this.midDistance - this.cubeRadius);
                         this.midPointArr[cubeDirection.Right] = cubeAxis;
-                        // console.log('Right', cubeAxis.position);
                         break;
                     case cubeDirection.Left:
                         cubeAxis.matrix.multiply(new THREE.Matrix4().makeTranslation(this.cubeRadius, this.midDistance, this.midDistance));
                         cubeAxis.applyMatrix4(matrix);
-                        //     cubeAxis.translateOnAxis(new Vector3(0, 1, 1), this.midDistance);
-                        //     cubeAxis.translateOnAxis(new Vector3(1, 0, 0), this.cubeRadius);
                         this.midPointArr[cubeDirection.Left] = cubeAxis;
-                        //     // console.log('Left', cubeAxis.position);
                         break;
                     case cubeDirection.Up:
                         cubeAxis.matrix.multiply(new THREE.Matrix4().makeTranslation(this.midDistance, this.maxDistance - this.cubeRadius, this.midDistance));
                         cubeAxis.applyMatrix4(matrix);
-                        //     cubeAxis.translateOnAxis(new Vector3(1, 0, 1), this.midDistance);
-                        //     cubeAxis.translateOnAxis(new Vector3(0, 1, 0), 2 * this.midDistance - this.cubeRadius);
                         this.midPointArr[cubeDirection.Up] = cubeAxis;
-                        //     // console.log('Up', cubeAxis.position);
                         break;
                     case cubeDirection.Down:
                         cubeAxis.matrix.multiply(new THREE.Matrix4().makeTranslation(this.midDistance, this.cubeRadius, this.midDistance));
                         cubeAxis.applyMatrix4(matrix);
-                        //     cubeAxis.translateOnAxis(new Vector3(1, 0, 1), this.midDistance);
-                        //     cubeAxis.translateOnAxis(new Vector3(0, 1, 0), this.cubeRadius);
                         this.midPointArr[cubeDirection.Down] = cubeAxis;
-                        //     // console.log('Down', cubeAxis.position);
                         break;
                     case cubeDirection.Front:
                         cubeAxis.matrix.multiply(new THREE.Matrix4().makeTranslation(this.midDistance, this.midDistance, this.maxDistance - this.cubeRadius));
                         cubeAxis.applyMatrix4(matrix);
-                        //     cubeAxis.translateOnAxis(new Vector3(1, 1, 0), this.midDistance);
-                        //     cubeAxis.translateOnAxis(new Vector3(0, 0, 1), 2 * this.midDistance - this.cubeRadius);
                         this.midPointArr[cubeDirection.Front] = cubeAxis;
-                        //     // console.log('Front', cubeAxis.position);
                         break;
                     case cubeDirection.Back:
                         cubeAxis.matrix.multiply(new THREE.Matrix4().makeTranslation(this.midDistance, this.midDistance, this.cubeRadius));
                         cubeAxis.applyMatrix4(matrix);
-                        //     cubeAxis.translateOnAxis(new Vector3(1, 1, 0), this.midDistance);
-                        //     cubeAxis.translateOnAxis(new Vector3(0, 0, 1), this.cubeRadius);
                         this.midPointArr[cubeDirection.Back] = cubeAxis;
-                        //     // console.log('Back', cubeAxis.position);
                         break;
-                    // default:
-                    //     break;
+                    default:
+                        break;
                 }
                 this.scene.add(cubeAxis);
             }
