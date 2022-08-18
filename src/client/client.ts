@@ -147,7 +147,6 @@ $("#imediateApply").on("click", function () {
 })
 
 $("#test").on("click", function () {
-    // magicCube.test();
     // console.log(camera.position);
 })
 

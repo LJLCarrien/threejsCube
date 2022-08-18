@@ -561,14 +561,6 @@ export class MagicCube {
         return null;
     }
 
-    public test() {
-        let midAxes = this.getMidAxes(cubeDirection.Right);
-        midAxes.matrix.multiply(new THREE.Matrix4().makeRotationX(90));
-        let result: baseVectorObj = this.getBasisVec(midAxes.matrix);
-        console.log(result);
-
-    }
-
     private rotateImediate(direction: cubeDirection, rtDirect: rotateDirection, angle: number) {
         let arr: Array<smallCube> = this.getFaceCube(direction);
 
@@ -581,6 +573,7 @@ export class MagicCube {
         angle = angle * Math.PI / 180;
         let absAngle = Math.abs(angle);
         resultAngle = resultAngle * absAngle;
+        
         // console.log("resultAngle: ", resultAngle);
         // let midCube = this.getMidCube(direction);
 
@@ -596,18 +589,6 @@ export class MagicCube {
         let midCube = this.midPointArr[direction];
         const midCube_matrix: Matrix4 = midCube.matrix;
 
-
-        //旋转虚拟中心点
-        let midAxes = this.getMidAxes(direction);
-        if (direction == cubeDirection.Left || direction == cubeDirection.Right) {
-            midAxes.matrix.multiply(new THREE.Matrix4().makeRotationX(resultAngle));
-        }
-        else if (direction == cubeDirection.Up || direction == cubeDirection.Down) {
-            midAxes.matrix.multiply(new THREE.Matrix4().makeRotationY(resultAngle));
-        }
-        else if (direction == cubeDirection.Front || direction == cubeDirection.Back) {
-            midAxes.matrix.multiply(new THREE.Matrix4().makeRotationZ(resultAngle));
-        }
 
         for (let i = 0; i < arr.length; i++) {
             let item = arr[i].mesh;

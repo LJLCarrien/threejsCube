@@ -121,7 +121,6 @@ $("#imediateApply").on("click", function () {
     magicCube.imediateApply();
 });
 $("#test").on("click", function () {
-    // magicCube.test();
     // console.log(camera.position);
 });
 var raycaster = new THREE.Raycaster();
