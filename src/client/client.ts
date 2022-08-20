@@ -106,11 +106,21 @@ function resetCylinder() {
 }
 function updateCylinder(angle) {
     cylinder.matrix = new THREE.Matrix4();
-    cylinder_matrix = new THREE.Matrix4().makeTranslation(0.0, 1.0, 0.0);
-    cylinder_matrix.multiply(new THREE.Matrix4().makeRotationZ(angle * Math.PI / 180));
+    // cylinder_matrix = new THREE.Matrix4().makeTranslation(0.0, 1.0, 0.0);
+    // cylinder_matrix.multiply(new THREE.Matrix4().makeRotationZ(angle * Math.PI / 180));
+
+    var q = new THREE.Quaternion();
+    q.setFromAxisAngle(new THREE.Vector3(0, 0, 1), angle * Math.PI / 180);
+    cylinder_matrix = new THREE.Matrix4().compose(new Vector3(0.0, 1.0, 0.0), q,new Vector3(1,1,1));
+
     cylinder_matrix.multiply(new THREE.Matrix4().makeTranslation(0.0, 0.75, 0.0));
+
     cylinder.applyMatrix4(cylinder_matrix);
-    console.log(cylinder.position)
+
+    // console.log(cylinder.position)
+    // console.log(cylinder.quaternion);
+    // cylinder.updateMatrix();
+
 }
 
 function initBase() {
