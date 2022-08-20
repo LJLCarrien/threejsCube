@@ -173,7 +173,8 @@ function onWDocMouseDown(event) {
         obj.getWorldPosition(worldPos);
         var roudnWorldPos = roundPosition(worldPos);
 
-        console.log('localPos:', obj.position, 'roudnWorldPos:', roudnWorldPos, 'worldPos:', worldPos);
+        // console.log('localPos:', obj.position, 'roudnWorldPos:', roudnWorldPos, 'worldPos:', worldPos);
+        console.log('worldPos:', worldPos,obj.uuid);
 
         magicCube.setRotateShowUUid(obj.uuid);
         // console.log(obj.uuid);

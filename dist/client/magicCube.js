@@ -1,5 +1,5 @@
 import * as THREE from '/build/three.module.js';
-import { AxesHelper, Matrix4, Vector3 } from '/build/three.module.js';
+import { AxesHelper, Matrix4, Quaternion, Vector3 } from '/build/three.module.js';
 import { roundPosition } from "./vectorHelper";
 // 以下按照面的渲染顺序排序(上黄下白，前蓝后绿，左橙右红)
 export var rotateDirection;
@@ -132,7 +132,7 @@ export class MagicCube {
                 this.scene.add(cubeAxis);
             }
         }
-        console.log(this.midPointArr);
+        // console.log(this.midPointArr);
     }
     getMidAxes(direction) {
         return this.midPointArr[direction];
@@ -242,10 +242,12 @@ export class MagicCube {
      * 获取物体的世界坐标，并将位置四舍五入，保留1位小数
      * @param obj
      */
-    getWorldPosition(obj) {
+    getWorldPosition(obj, isNeedRound = false) {
         let worldPositon = new THREE.Vector3();
         obj.getWorldPosition(worldPositon);
-        worldPositon = roundPosition(worldPositon);
+        if (isNeedRound) {
+            worldPositon = roundPosition(worldPositon);
+        }
         return worldPositon;
     }
     /**
@@ -256,13 +258,9 @@ export class MagicCube {
         console.log();
         let worldPositon = new THREE.Vector3();
         obj.getWorldPosition(worldPositon);
-        console.log("--------------");
-        console.log("1 worldPositon:", worldPositon);
         let newWorldPositon = roundPosition(worldPositon);
-        console.log("2 roundWorldPosition:", newWorldPositon);
         let offset = newWorldPositon.sub(worldPositon);
         obj.matrix.premultiply(new THREE.Matrix4().makeTranslation(offset.x, offset.y, offset.z));
-        // console.log("3 worldPositon:", obj.getWorldPosition(worldPositon));
     }
     getMidCube(direction) {
         for (let i = 0; i < this.cubeArr.length; i++) {
@@ -326,10 +324,9 @@ export class MagicCube {
         let frontSign = this.cubeRadius + (this.maxRanks - 1) * (this.cubeDiameter + this.cubeOffset);
         for (let i = 0; i < this.cubeArr.length; i++) {
             let item = this.cubeArr[i];
-            //local position
-            // let position = item.position;
+            //local position: let position = item.position;
             //world position
-            let worldPositon = this.getWorldPosition(item.mesh);
+            let worldPositon = this.getWorldPosition(item.mesh, true);
             switch (direction) {
                 case cubeDirection.Right:
                     if (this.isFloatSame(worldPositon.x, rightSign)) {
@@ -394,14 +391,14 @@ export class MagicCube {
                 console.log("动画过程中不允许旋转");
                 return;
             }
-            this.roundAll();
+            // this.roundAll();
             this.updateRelativePos(direction);
             this.direction = direction;
             this.rtDirect = rtDirect;
             this.targetAngle = angle;
         }
         else {
-            this.roundAll();
+            // this.roundAll();
             this.updateRelativePos(direction);
             if (this.isAnimating()) {
                 this.imediateApply();
@@ -466,8 +463,8 @@ export class MagicCube {
         for (let index = 0; index < arr.length; index++) {
             const item = arr[index].mesh;
             let itemWorldPos = this.getWorldPosition(item);
-            console.log('item_world_pos', itemWorldPos);
-            console.log('item_world_pos', itemWorldPos);
+            // console.log('item_world_pos', itemWorldPos);
+            // console.log('item_world_pos', itemWorldPos);
             let relativePos = new Vector3(itemWorldPos.x - mideCubeWorldPos.x, itemWorldPos.y - mideCubeWorldPos.y, itemWorldPos.z - mideCubeWorldPos.z);
             // 世界空间的相对位置，转成基于中间方块坐标系下的相对位置
             let baseRelativePos = this.vectorChangBasic(relativePos, mideBaseVec);
@@ -480,6 +477,12 @@ export class MagicCube {
             return this.dic[uuid];
         }
         return null;
+    }
+    makeRotationX(position, angle) {
+        var q = new Quaternion();
+        q.setFromAxisAngle(new THREE.Vector3(1, 0, 0), angle);
+        var matrix = new THREE.Matrix4().compose(position, q, new Vector3(1, 1, 1));
+        return matrix;
     }
     rotateImediate(direction, rtDirect, angle) {
         let arr = this.getFaceCube(direction);
@@ -521,7 +524,13 @@ export class MagicCube {
                     item.matrix = midCube_matrix.clone();
                     if (direction == cubeDirection.Left || direction == cubeDirection.Right) {
                         item.matrix.multiply(new THREE.Matrix4().makeRotationX(resultAngle));
+                        //旋转的部分改为用四元数实现
+                        // var q = new Quaternion();
+                        // q.setFromAxisAngle(new THREE.Vector3(1, 0, 0), resultAngle);
+                        // item.matrix = new THREE.Matrix4().compose(midCube.position, q, new Vector3(1, 1, 1));    
+                        // item.matrix = this.makeRotationX(midCube.position, resultAngle);
                         item.matrix.multiply(new THREE.Matrix4().makeTranslation(offsetPos.x, offsetPos.y, offsetPos.z));
+                        // console.log(this.getWorldPosition(item));
                     }
                     else if (direction == cubeDirection.Up || direction == cubeDirection.Down) {
                         item.matrix.multiply(new THREE.Matrix4().makeRotationY(resultAngle));
